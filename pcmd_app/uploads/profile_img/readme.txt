@@ -1,0 +1,1 @@
+#subdirectory where all the user uploaded profile images are stored

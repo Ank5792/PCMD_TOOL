@@ -1,0 +1,327 @@
+{% extends 'main.html' %}
+{% block page_title %} PCMD - Home {% endblock %}
+{% block content_container %}
+
+<style>
+    /* CSS for Table Container */
+    .table-container {
+        max-width: 100%;
+        max-height: 400px;
+        overflow-x: auto;
+        overflow-y: auto;
+    }
+
+    /* CSS for Table */
+    .table {
+        border-collapse: collapse;
+        width: auto;
+        table-layout: auto;
+    }
+
+    /* CSS for Table Header */
+    .table th {
+        background-color: #f2f2f2;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    /* CSS for Table Cells */
+    .table td {
+        padding: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* CSS for Input Fields */
+    .table input[type="text"] {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    /* CSS for Submit Button */
+    .submit-btn-container {
+        display: flex;
+        justify-content: center;
+        padding-top: 15px;
+    }
+
+    .submit-btn-container input[type="submit"] {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        background-color: #007bff;
+        color: #fff;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    /* CSS for Submit Button Hover Animation */
+    .submit-btn-container input[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+    #myDiv {
+        display: none;
+    }
+    .spinner{
+        height: 50px;
+        width: 50px;
+        background-color: white;
+        border-radius: 50%;
+        border: 10px solid #fff;
+        border-top-color: #007bff;
+        animation: spin 1s linear infinite;
+        align-items: center;
+        align-content: center;
+        text-align: center;
+        }   
+        @keyframes spin {
+            0%{
+                transform: rotate(0deg);
+            }
+            100%{
+                transform: rotate(360deg);
+            }
+            
+    }
+     
+</style>
+<div class="d-flex justify-content-center align-items-center my-3" style="align-items: center;text-align: center; justify-content: center;">
+    <div id="myDiv" class="spinner" >
+        <div id="pp" ></div>
+    </div>    
+</div>
+<form action="{{ url_for('web.updateBMCIPStatus')}}"  id="BMCUpdateForm" >
+</form>
+<form method="post" action="/update" class="table-form" onsubmit="return confirmAction()">
+    <div id="updateOperations" style="display: flex; align-items: center; padding: 10px;">
+        <div style="flex-grow: 1;margin-right: 10px;">
+            <input type="text" id="myInput" onkeyup="searchTableColumns()" placeholder="Search required field here.." style="width: 100%; padding: 5px;">
+        </div>
+        <div style="margin-right: 10px;">
+            <input type="number" id="noofrows" placeholder="Enter Row Nos." style="padding: 5px;">
+        </div>
+        <div style="margin-right: 10px;">
+            <button type="button" id="add-row-btn" class="btn btn-secondary">Add Row</button>
+        </div>
+        <div style="margin-right: 10px;">
+            <a href="/download" style="text-decoration: none;">
+                <button type="button" class="btn btn-secondary">Download Excel File</button>
+            </a>
+        </div>
+        <div>
+            <button type="button" id="delete-selected-rows" class="btn btn-danger">Delete Selected Rows</button>
+        </div>
+        <div style="margin-right: 10px;" class="mx-2">
+                <button type="button" id="updateBMCIPStatus" class="btn btn-secondary" disabled>Update BMC IP Status</button>
+        </div>
+    </div>
+    
+    <div class="table-container" style="text-align: center;">
+        <table class="table table-bordered" id="data-table" style="overflow-y: hidden; margin: 0 auto;">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    {% for col in df.columns %}
+                    <th>{{ col }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for index, row in df.iterrows() %}
+                <tr>
+                    <td><input type="checkbox" class="row-checkbox" name="selected-row"></td>
+                    {% for col in row.index %}
+                    <td>
+                        <input type="text" class="column-input" name="{{ index }}_{{ col }}" value="{{ row[col] }}">
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="submit-btn-container">
+        <input type="submit" value="Update File" class="btn btn-primary mx-2" >
+    </div>
+    <input type="hidden" id="colnos" name="colnos" value="{{ df.shape[1] }}">
+    <input type="hidden" id="rownos" name="rownos" value="{{ df.shape[0] }}">
+</form>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+   document.querySelector('#updateBMCIPStatus').addEventListener('click', function() {
+        var confirmation = confirm("Are you sure you want to perform this action?");
+        if (confirmation) {
+            // Perform action when user clicks OK
+            // For example, submit a form
+            document.querySelector('#BMCUpdateForm').submit();
+            $('#myDiv').toggle();
+            
+            document.getElementById("myForm").submit();
+        } else {
+            console.log("Confirmation status: false"); // Confirmation status is false if user clicks Cancel
+        }
+    });
+
+   
+    function confirmAction() {
+        var confirmation = confirm("Are you sure you want to perform this action?");
+    return confirmation; 
+    }
+    $(document).ready(function() {
+        $('.column-input').each(function() {
+            $(this).on('input', function() {
+                // Get the width of the input field
+                var inputWidth = $(this).val().length * 10;
+                // Set the minimum width
+                if (inputWidth < 100) {
+                    inputWidth = 100;
+                }
+                // Set the width of the input field
+                $(this).css('width', inputWidth + 'px');
+            });
+        });
+    });
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const addRowButton = document.getElementById('add-row-btn');
+        const addColumnButton = document.getElementById('add-column-btn');
+        const dataTable = document.getElementById('data-table');
+        
+        // Function to add a new row
+        addRowButton.addEventListener('click', function() {
+          
+            let nooftimes=parseInt(document.getElementById('noofrows').value);
+            console.log("triing to add columns")
+            console.log("nooftimes= ",nooftimes)
+            const newRow = document.createElement('tr');
+            const rownos = parseInt(document.getElementById('rownos').value);
+
+           
+            GNR_headings=['HW ID', 'Site', 'Platform ID',
+                                    'Project Name', 'Host Name', 'BMC IP', 'QDF', 'Bios Version', 'Si Qty',
+                                    'DIMM Freq', 'DIMM Size/Capacity (Gb)', 'DIMM Rank/W',
+                                    'DIMM Manufacturer/Vendor', 'DIMM Type', 'DIMM Qty', 'DIMM Location',
+                                    'PCIe_Speed', 'PCIe_Card_Details', 'CXL_Card', 'Storage_Device',
+                                    'PCIe_Location', 'IFWI flashing Tool', 'Debug Tools', 'OS Configured',
+                                    'KVM', 'PDU/Power Splitter', 'Usage', 'Reserved', 'ReservedBy', 'Time',
+                                    'Date']
+                                    console.log("length==",GNR_headings.length)
+                                    console.log("rownos==",rownos)
+            for (let j = rownos; j < rownos+nooftimes; j++) {
+                console.log("j == ", j);
+                let newRow = document.createElement('tr'); // Create a new row element
+                let newRowHTML = '';
+                newRowHTML += `<td><input type="checkbox" class="row-checkbox" name="selected-row"></td>`;
+                for (let i = 0; i < GNR_headings.length; i++) {
+                        if(i<6)
+                        {
+                            newRowHTML += `<td><input type="text" name="${j}_${GNR_headings[i]}"required></td>`;
+                        }
+                        else{
+                            newRowHTML += `<td><input type="text" name="${j}_${GNR_headings[i]}" ></td>`;
+                        }
+                    
+                    
+                }
+                newRow.innerHTML = newRowHTML; // Set the HTML content for the new row
+                dataTable.querySelector('tbody').appendChild(newRow); // Append the new row to the tbody
+            }
+
+        
+        });
+
+        // Function to add a new column
+        addColumnButton.addEventListener('click', function() {
+            addColumnButton.addEventListener('click', function() {
+            const newColumnName = document.getElementById('new-column-name').value;
+            const rownos = document.getElementById('rownos').value;
+            
+                // Iterate through each row
+                const rows = document.querySelectorAll('#data-table tbody tr');
+                rows.forEach(function(row) {
+                    // Create a new cell for the current row
+                    const newCell = document.createElement('td');
+                    // Add an input field to the new cell
+                    newCell.innerHTML = '<input type="text">';
+                    // Append the new cell to the current row
+                    row.appendChild(newCell);
+                });
+            });
+
+        });
+
+
+
+
+
+
+    });
+    function searchTableColumns() {
+    // Get the input element and search query
+    var input = document.getElementById("myInput");
+    var filter = input.value.toUpperCase();
+
+    // Get the table and rows
+    var table = document.getElementById("data-table");
+    var rows = table.getElementsByTagName("tr");
+
+    // Loop through all table rows, starting from the second row (skipping the header)
+    for (var i = 1; i < rows.length; i++) {
+        var row = rows[i];
+        var cells = row.getElementsByTagName("td");
+        var found = false;
+
+        // Loop through all cells in the current row
+        for (var j = 0; j < cells.length; j++) {
+            var cell = cells[j];
+            if (cell) {
+                // Check if the cell contains an input field
+                var inputField = cell.querySelector("input[type='text']");
+                if (inputField) {
+                    // Get the value of the input field
+                    var cellValue = inputField.value.toUpperCase();
+                    console.log("cellValue= ",cellValue);
+                    if (cellValue.indexOf(filter) > -1) {
+                        found = true;
+                        break; // Break the inner loop if a match is found
+                    }
+                }
+            }
+        }
+
+        // Show or hide the row based on whether it matches the search query
+        if (found) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    }
+}
+// JavaScript for handling row selection and deletion
+document.addEventListener('DOMContentLoaded', function () {
+        // Select all checkbox
+        const selectAllCheckbox = document.createElement('input');
+        selectAllCheckbox.type = 'checkbox';
+        selectAllCheckbox.id = 'select-all-checkbox';
+        selectAllCheckbox.addEventListener('change', function () {
+            const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+            rowCheckboxes.forEach(checkbox => checkbox.checked = this.checked);
+        });
+        document.querySelector('thead tr').firstElementChild.appendChild(selectAllCheckbox);
+
+        // Delete selected rows button
+        document.getElementById('delete-selected-rows').addEventListener('click', function () {
+            const rowCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+            rowCheckboxes.forEach(checkbox => checkbox.closest('tr').remove());
+        });
+    });
+    
+</script>
+
+{% endblock %}

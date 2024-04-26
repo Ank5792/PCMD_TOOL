@@ -1,0 +1,239 @@
+{% extends 'main.html' %}
+{% block page_title %} PCMD - Home {% endblock %}
+{% block content_container %}
+
+
+
+<!-- ... (existing code) ... -->
+<!-- ... (existing code) ... -->
+<style>
+    td,th:not(:last-child) {
+    border-right: 1px solid black;
+  }
+</style>
+<!-- Display the DataFrame table with checkboxes and time selection -->
+<h5 style="color:black;text-align:center">Article id : {{ article_id }} can run on below platforms</h5>
+<form action="{{ url_for('web.reserve') }}" method="post">
+    <div style="max-height: 800px; max-width: 2000px; overflow-y: auto;">
+        <table class="table table-striped" style="border: 1px solid black;">
+            <thead>
+                <tr>
+                    {% for column in columns %}
+                        <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for index, row in df.iterrows() %}
+                    <tr id="{{ index }}">
+                        {% for column, value in row.items() %}
+                            {% if column == 'DIMM Location' %}
+                            <td><a href="#" class="open-modal1" data-ip="{{ row['BMC IP'] }}">{{ value }}</a></td>
+                            {% elif column == 'PCIe_Location' %}
+                                <td><a href="#" class="open-modal2" data-ip="{{ row['BMC IP'] }}">{{ value }}</a></td>
+                            {% else %}
+                                <td>{{ value }}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>
+
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">BMC IP Details</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="padding-top:10px">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="modal-body-content" style="overflow:scroll">
+            <!-- Add your table or content here -->
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+        </div>
+      </div>
+    </div>
+</div>
+
+
+
+<script>
+  
+    $(document).ready(function () {
+        
+    
+        
+        function closeModal(ip) {
+            
+            $('#myModal').modal('hide');
+        }
+           
+        function getData_dimm(ip) {
+            console.log("ip== ",ip)
+        
+            // Make an AJAX request to the Flask route for fetching data
+            fetch(`/get_data/${ip}`)
+                .then(response => response.json())
+                .then(data => displayData1(data,ip))
+                .catch(error => console.error('Error:', error));
+         }
+         function getData_pci(ip) {
+            console.log("ip== ",ip)
+        
+            // Make an AJAX request to the Flask route for fetching data
+            fetch(`/get_data_pci/${ip}`)
+                .then(response => response.json())
+                .then(data => displayData2(data,ip))
+                .catch(error => console.error('Error:', error));
+         }
+         function openModal1(data, ip) {
+            // Update the modal content with the fetched data
+           
+            console.log("data= ",data[0]['@odata.id'])
+            console.log("length== ",data.length)
+           
+            var modalBody = $('#modal-body-content');
+            modalBody.html('<p>Details for BMC IP: ' + ip + '</p>');
+        
+            // Create a table to display the JSON data
+            var table = $('<table class="table table-striped"></table>');
+            var tableHeadRow = $('<tr></tr>');
+        
+            // Assuming data is an object (not an array)
+            dimm_Naming_headings=['ServiceLabel','BaseModuleType','CapacityMiB','Manufacturer','MemoryDeviceType','MemoryType','RankCount',"Status"]
+            dimm_headings=['Location.PartLocation.ServiceLabel','BaseModuleType','CapacityMiB','Manufacturer','MemoryDeviceType','MemoryType','RankCount','Status.State']
+            for (let i=0;i<dimm_headings.length;i++) {
+                console.log("heading= ",dimm_headings[i])
+                tableHeadRow.append('<th>' + dimm_Naming_headings[i] + '</th>');
+            }
+            
+            table.append(tableHeadRow);
+           
+            for(var row=0;row<data.length;row++)
+            {
+                var tableDataRow = $('<tr></tr>');
+                for(var head=0;head<dimm_headings.length;head++)
+                {
+                    var value=data[row][dimm_headings[head]];
+                    tableDataRow.append('<td>' + value + '</td>');
+                }
+                table.append(tableDataRow);
+            }
+            modalBody.append(table);
+            $('#myModal').modal('show');
+            var table = $('#myModal').find('table');
+            var tableHeight = table.outerHeight();
+            var modalDialog = $('#myModal').find('.modal-dialog');
+            modalDialog.height(tableHeight);
+        }
+            function openModal2(data, ip) {
+                // Update the modal content with the fetched data
+               
+                console.log("data= ",data[0]['@odata.id'])
+                console.log("length== ",data.length)
+                
+                var modalBody = $('#modal-body-content');
+                modalBody.html('<p>Details for BMC IP: ' + ip + '</p>');
+            
+                // Create a table to display the JSON data
+                var table = $('<table class="table table-striped"></table>');
+                var tableHeadRow = $('<tr></tr>');
+            
+                // Assuming data is an object (not an array)
+                dimm_Naming_headings=['BDF','PCI Speed','Card Name','Manufacturer','DeviceClass','DeviceId','VendorId',"Status"]
+                dimm_headings=['Id','PCIeInterface.PCIeType','PCI Card Name','Manufacturer','DeviceClass','DeviceId','VendorId','Status.State']
+                for (let i=0;i<dimm_headings.length;i++) {
+                    console.log("heading= ",dimm_headings[i])
+                    tableHeadRow.append('<th>' + dimm_Naming_headings[i] + '</th>');
+                }
+                
+                table.append(tableHeadRow);
+               
+                for(var row=0;row<data.length;row++)
+                {
+                    var tableDataRow = $('<tr></tr>');
+                    for(var head=0;head<dimm_headings.length;head++)
+                    {
+                        var value=data[row][dimm_headings[head]];
+                        tableDataRow.append('<td>' + value + '</td>');
+                    }
+                    table.append(tableDataRow);
+                }
+        
+                modalBody.append(table);
+                $('#myModal').modal('show');
+                var table = $('#myModal').find('table');
+                var tableHeight = table.outerHeight();
+                var modalDialog = $('#myModal').find('.modal-dialog');
+                modalDialog.height(tableHeight);
+            }
+            
+        
+        
+        function displayData1(data,ip) {
+            console.log("ip== ",ip)
+            console.log("data== ",data[0])
+            console.log('data.length= ',data.length)
+            if (data.length==0)
+                alert(`No PCIe Data found for IP : ${ip}`)
+            openModal1(data,ip);    
+
+        }
+        function displayData2(data,ip) {
+            console.log("ip== ",ip)
+            console.log("data== ",data[0])
+            console.log('data.length= ',data.length)
+            if (data.length==0)
+                alert(`No PCIe Data found for IP : ${ip}`)
+            openModal2(data,ip);
+
+        }
+
+
+
+        // Attach a click event to all elements with the 'open-modal' class
+        $('.open-modal1').click(function (event) {
+            event.preventDefault();
+            var ip = $(this).data('ip');
+           
+            getData_dimm(ip)
+           
+        });
+        $('.open-modal2').click(function (event) {
+            event.preventDefault();
+            var ip = $(this).data('ip');
+            getData_pci(ip)
+           
+        });
+        $('.close').click(function (event) {
+            event.preventDefault();
+            var ip = $(this).data('ip');
+            closeModal(ip);
+        });
+    });
+    //javascript to handle date and time
+    $(document).ready(function(){
+        $('.datetimepicker').datetimepicker({
+            timeFormat: 'HH:mm',
+            dateFormat: 'yy-mm-dd',
+            controlType: 'select',
+            oneLine: true
+        });
+     });
+  
+    
+</script>
+
+<!-- ... (remaining code) ... -->
+
+
+{% endblock %}

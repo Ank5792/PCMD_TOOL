@@ -1,0 +1,137 @@
+{"Blue":[
+   
+    {
+        "Charter": "FWEVAL",
+        "TCD Query Name": "GNRAP_Si_FWEVAL_BL",
+        "TCD Query": "queryId=16019129330"
+    },
+    {
+        "Charter": "NT-MRC",
+        "TCD Query Name": "GNRAP_Si_MRC_BL",
+        "TCD Query": "queryId=16019206244"
+    },
+    {
+        "Charter": "IPVAL-MRC",
+        "TCD Query Name": "GNRAP_Si_IPVAL-MRC_BL",
+        "TCD Query": "queryId=16019206239"
+    },
+    {
+        "Charter": "CLV",
+        "TCD Query Name": "GNRAP_Si_CLV_BL",
+        "TCD Query": "queryId=16019206204"
+    },
+    {
+        "Charter": "Security",
+        "TCD Query Name": "FIV--BHS_AP_Blue_TC_V1bios_security",
+        "TCD Query": "queryId=1508795809"
+    },
+    {
+        "Charter": "ACM",
+        "TCD Query Name": "GNRAP_Si_ACM_BL",
+        "TCD Query": "queryId=16019686353"
+    },
+    {
+        "Charter": "USF",
+        "TCD Query Name": "GNRAP_Si_USF_BL",
+        "TCD Query": "queryId=16019206246"
+    },
+    {
+        "Charter": "FWEVAL",
+        "TCD Query Name": "GNRAP_Si_FWEVAL_Ext-BL",
+        "TCD Query": "queryId=16019205527"
+    },
+    {
+        "Charter": "IPVAL-RAS",
+        "TCD Query Name": "GNRAP_Si_IPVAL-RAS_BL",
+        "TCD Query": "queryId=16019685606"
+    },
+    {
+        "Charter": "NT-MRC",
+        "TCD Query Name": "GNRAP_Si_MRC_Ext-BL",
+        "TCD Query": "queryId=16019206562"
+    },
+    {
+        "Charter": "CLV",
+        "TCD Query Name": "GNRAP_Si_CLV_Ext-BL",
+        "TCD Query": "queryId=16019206284"
+    },
+    {
+        "Charter": "Security",
+        "TCD Query Name": "TDSHIM_MIGTD_TPA_FUZZING_TCD_new",
+        "TCD Query": "queryId=15013244433"
+    },
+    {
+        "Charter": null,
+        "TCD Query Name": "Total TCD in Production",
+        "TCD Query": "queryId=16019771188"
+    },
+    {
+        "Charter": "NT-MRC",
+        "TCD Query Name": "GNRAP_Si_MRC_BL",
+        "TCD Query": "queryId=16019206244"
+    },
+    {
+        "Charter": "IPVAL-MRC",
+        "TCD Query Name": "GNRAP_Si_IPVAL-MRC_BL",
+        "TCD Query": "queryId=16019206239"
+    },
+    {
+        "Charter": "CLV",
+        "TCD Query Name": "GNRAP_Si_CLV_BL",
+        "TCD Query": "queryId=16019206204"
+    },
+    {
+        "Charter": "Security",
+        "TCD Query Name": "FIV--BHS_AP_Blue_TC_V1bios_security",
+        "TCD Query": "queryId=1508795809"
+    },
+    {
+        "Charter": "ACM",
+        "TCD Query Name": "GNRAP_Si_ACM_BL",
+        "TCD Query": "queryId=16019686353"
+    },
+    {
+        "Charter": "USF",
+        "TCD Query Name": "GNRAP_Si_USF_BL",
+        "TCD Query": "queryId=16019206246"
+    },
+    {
+        "Charter": "FWEVAL",
+        "TCD Query Name": "GNRAP_Si_FWEVAL_Ext-BL",
+        "TCD Query": "queryId=16019205527"
+    },
+    {
+        "Charter": "IPVAL-RAS",
+        "TCD Query Name": "GNRAP_Si_IPVAL-RAS_BL",
+        "TCD Query": "queryId=16019685606"
+    },
+    {
+        "Charter": "NT-MRC",
+        "TCD Query Name": "GNRAP_Si_MRC_Ext-BL",
+        "TCD Query": "queryId=16019206562"
+    },
+    {
+        "Charter": "CLV",
+        "TCD Query Name": "GNRAP_Si_CLV_Ext-BL",
+        "TCD Query": "queryId=16019206284"
+    },
+    {
+        "Charter": "Security",
+        "TCD Query Name": "TDSHIM_MIGTD_TPA_FUZZING_TCD_new",
+        "TCD Query": "queryId=15013244433"
+    }
+],
+"Orange":[
+    {
+        "Charter": "Charter",
+        "TCD Query Name": "GNRAP_OR_Post-Si_v1",
+        "TCD Query": "queryId=16023370788"
+    },{
+        
+        "Charter": "Charter",
+        "TCD Query Name": "P1 Orange Query",
+        "TCD Query": "queryId=16019102685"
+    }
+]
+
+}

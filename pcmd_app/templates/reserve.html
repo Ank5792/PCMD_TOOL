@@ -1,0 +1,30 @@
+{% extends 'main.html' %}
+{% block page_title %} FEAST - Home {% endblock %}
+{% block content_container %}
+<!-- ... (existing code) ... -->
+
+    <!-- Display selected rows in a table below the button with time selection -->
+    {% if selected_data is defined %}
+        <div class="container" style="max-height: 800px; max-width: 2000px; overflow-y: auto;">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    {% for column in selected_data.columns %}
+                        <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for index, row in selected_data.iterrows() %}
+                    <tr>
+                        {% for value in row %}
+                            <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+{% endblock %}

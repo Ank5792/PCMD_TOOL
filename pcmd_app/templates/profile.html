@@ -1,0 +1,128 @@
+{% extends 'main.html' %}
+{% block page_title %} Profile {% endblock %}
+{% block content_container %}
+<div class="accordion my-2" id="about_you_accordion">
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="about_you_accordion_heading">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#about_you_accordion_collapse" aria-expanded="true" aria-controls="about_you_accordion_collapse">
+          About you
+        </button>
+      </h2>
+      <div id="about_you_accordion_collapse" class="accordion-collapse collapse" aria-labelledby="about_you_accordion_heading" data-bs-parent="#about_you_accordion">
+        <div class="accordion-body">
+            <ul>
+                {% if current_user.is_admin %}
+                <li class="list-item"> You have been made admin by nsonal (Sonal, Nirmal). You can edit all projects</li>
+                {% endif %}
+                <li class="list-item">Nickname : {{current_user.nick_name}}</li>
+                <li class="list-item">Email : {{current_user.email}}</li>
+                <li class="list-item">Password: It isn't stored in our database. Instead we directly verify you over Intel Servers.</li>
+            </ul>
+          
+        </div>
+      </div>
+    </div>
+</div>
+<ul class="nav nav-tabs" role="tablist">
+    {% for project in user_projects %}
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {{'active' if ((is_active is defined and is_active==loop.index) or (is_active is not defined and loop.index==1)) else ''}} "
+            data-bs-toggle="tab" aria-controls="{{'card'~loop.index}}" href="{{'#'~'card'~loop.index}}">
+            {{project[11]}}
+        </a>
+    </li>
+    {%endfor%}
+</ul>
+
+<div class="tab-content mt-1 mb-2">
+    {% for project in user_projects %}
+    <div role="tab-panel"
+        class="card card-body bg-light tab-pane fade  {{' show active' if ((is_active is defined and is_active==loop.index) or (is_active is not defined and loop.index==1)) else ''}}"
+        id="{{'card'~loop.index}}">
+        <div class="row mb-3">
+            <div class="col-12 text-danger">
+                <strong > * </strong> Mandatory fields
+            </div>
+        </div>
+        <form method="POST" action="{{ url_for('web.edit_project') }}" role="form">
+            {{ form.csrf_token }}
+            <input type="text" hidden value="{{project[0]}}" name="id">
+            <div class="mb-3">
+                <label for="tool_name" class="form-label">Tool Name <strong class="text-danger">*</strong> </label>
+                {{ form.tool_name(class="form-control", value=project[11]) }}
+            </div>
+            <div class="mb-3">
+                <label for="tool_name" class="form-label">Owner Email <strong class="text-danger">*</strong> </label>
+                {{ form.owner(class="form-control", aria_describedby="owneremailHelp",value=project[1]) }}
+                <div id="owneremailHelp" class="form-text">Owner can edit the content here.</div>
+            </div>
+            <div class="mb-3">
+                <label for="short_description" class="form-label">Short description  <small class="text-muted">5-6 lines preferrably</small> <strong class="text-danger">*</strong> </label>
+                {{ form.short_description(class="form-control",value=project[2]) }}
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description <strong class="text-danger">*</strong> </label>
+                <textarea class="form-control"  id="description" name="description"
+                    required>{{project[3]}}</textarea>
+            </div>
+            <div class="mb-3">
+                <label for="cur_status_{{project[0]}}" class="form-label">Current Development Status <strong class="text-danger">*</strong> </label>
+                <select class="form-select" id="cur_status_{{project[0]}}" name="current_status"
+                    onchange="show_link('{{project[0]}}')" required>
+                    <option value="" {{ "selected" if project[4]=='' }}>Please Select an option</option>
+                    <option value="web_dev" {{ "selected" if project[4]=='web_dev' }}>Web-Based, no link</option>
+                    <option value="web_prod" {{ "selected" if project[4]=='web_prod' }}>Web-Based with link</option>
+                    <option value="off_dev" {{ "selected" if project[4]=='off_dev' }}>Offline tool (no download link
+                        availble)</option>
+                    <option value="off_prod" {{ "selected" if project[4]=='off-prod' }}>Offline tool (link to
+                        download)</option>
+                </select>
+
+            </div>
+            <div class="mb-3" id="tool_link_input_{{project[0]}}">
+                <label for="working_links" class="form-label">Working Links <strong class="text-danger">*</strong></label>
+                {{ form.working_links(class="form-control" , aria_describedby="working_linksHelp",value=project[9]|join('; ')) }}
+                <div id="working_linksHelp" class="form-text">Multiple URLs can be added. (Separated by semicolon <strong>;</strong>.)</div>
+            </div>
+            <div class="mb-3">
+                <label for="wiki_link" class="form-label">Wiki Link </label>
+                {{ form.wiki_link(class="form-control", value=project[6]) }}
+            </div>
+            <div class="mb-3">
+                <label for="jira_link" class="form-label">Jira Link </label>
+                {{ form.jira_link(class="form-control", value=project[7]) }}
+            </div>
+            <div class="mb-3">
+                <label for="current_devs" class="form-label">Current Developers <strong class="text-danger">*</strong></label>
+                {{ form.current_devs(class="form-control", aria_describedby="current_devsHelp",value=project[10]|join('; ')) }}
+                <div id="current_devsHelp" class="form-text">Any @intel.com Email can be added. (Separated by semicolon <strong>;</strong>.)</div>
+            </div>
+            <div class="mb-3">
+                <label for="ags_link" class="form-label">AGS Link</label>
+                {{ form.ags_link(class="form-control", value = project[5] if not project[5]==' ' else "") }}
+            </div>
+            <div class="row mb-3 justify-content-center">
+                <button type="submit" class="btn btn-lg btn-success col-xs-12 col-md-4">Submit</button>
+            </div>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function show_link(id) {
+        cur_val = document.getElementById("cur_status_" + id).value;
+        if (cur_val === "web_prod" || cur_val == "off_prod") {
+            document.getElementById("tool_link_input_" + id).hidden = false;
+        }
+        else {
+            document.getElementById("tool_link_input_" + id).value = "";
+            document.getElementById("tool_link_input_" + id).hidden = true;
+        }
+    }
+
+</script>
+
+{% endblock %}

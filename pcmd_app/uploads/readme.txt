@@ -1,0 +1,1 @@
+The base folder where all the user uploads should be stored

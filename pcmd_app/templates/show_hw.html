@@ -1,0 +1,444 @@
+{% extends 'main.html' %}
+{% block page_title %} PCMD - Home {% endblock %}
+{% block content_container %}
+
+
+
+<!-- ... (existing code) ... -->
+<style>
+    td,th:not(:last-child) {
+    border-right: 1px solid black;
+  }
+
+    @keyframes blink-animation {
+        0% { color: red; }
+        50% { color: blue; }
+        100% { color: red; }
+    }
+    @-webkit-keyframes blink-animation {
+        0% { color: red; }
+        50% { color: blue; }
+        100% { color: red; }
+    }
+    p.blink {
+        font-size: large;
+        font-weight: bold;
+        animation: blink-animation 1s infinite;
+        -webkit-animation: blink-animation 1s infinite;
+    }
+    table{
+        width: 100%;
+        table-layout:auto;
+    }
+</style>
+<!-- Display the DataFrame table with checkboxes and time selection -->
+<div style="display: flex; justify-content: center;">
+    <div style="text-align: center; "><p id="live-hw-status" class="blink" > Live HW Status</p> </div>
+    <div class="mx-4">
+        <select id="filterColumn"  onchange="filterTableByColumn()">
+            <option value="">Select Project...</option>
+            {% for value in df['Project Name'].unique() %}
+                <option value="{{ value }}">{{ value }}</option>
+            {% endfor %}
+        </select>
+    </div> 
+    <div>
+        <button class="btn btn-primary mx-4 " onClick="downloadCSV('PCMDPlatformsDetails','PCMDPlatformsDetails')">Download CSV</button>
+    </div>
+</div>
+  
+
+
+<form action="{{ url_for('web.reserve') }}" method="post">
+    <div style="max-height: 800px; max-width: 2000px; overflow-y: auto;">
+      
+        <table id="PCMDPlatformsDetails" class="table table-striped" style="border: 1px solid black;">
+            <thead>
+                <tr style="background-color: #0a4275;color: antiquewhite;">
+                    {% for column in columns %}
+                        <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for index, row in df.iterrows() %}
+                    {%  if row['DIMM Freq']|string  == 'nan' %}
+                        <tr id="{{ index }}" style="background-color:rgb(249, 188, 188);">
+                    {% else %}
+                        <tr id="{{ index }}" style="background-color:rgb(206, 247, 198);">
+                    {% endif %}
+                        {% for column, value in row.items() %}
+                            {% if column == 'DIMM Location' %}
+                                <td><a href="#" class="open-modal1" data-ip="{{ row['BMC IP'] }}" data-wanted_path={{wanted_path}}>{{ value }}</a></td>
+                            {% elif column == 'PCIe_Location' %}
+                                <td><a href="#" class="open-modal2" data-ip="{{ row['BMC IP'] }}" data-wanted_path={{wanted_path}}>{{ value }}</a></td>                            
+                            {% else %}
+                                <td>{{ value }}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>
+
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">BMC IP Details</h5>
+          <button onclick="generateAndDownloadTableParams()" id="generateAndDownloadTableParams" class="btn btn-link" style="padding: 0;">
+            Download <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+            </svg>
+        </button>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="modal-body-content" style="overflow:scroll">
+            <!-- Add your table or content here -->
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div id="dataContainer">
+
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    let count=0;
+    function filterTableByColumn() {
+      
+       
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("filterColumn");
+        filter = input.value.toUpperCase();
+      
+        var selectedProject = "{{ selected_project }}";
+        if(selectedProject && count==0)
+            filter=selectedProject
+        count++;
+        console.log('Filter: ',filter)
+        console.log('selectedProject: ',selectedProject)
+        table = document.getElementById("PCMDPlatformsDetails");
+        tr = table.getElementsByTagName("tr");
+        console.log('filter: ',filter)
+       
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[3]; // Update index of the column
+          
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+
+      function generateAndDownloadTableParams() {
+        console.log("inside generate and download function")
+      
+       
+            try {
+              
+                downloadCSV1(); 
+                // Attempt to download table for the current ID
+            } catch (error) {
+                console.log("Error downloading table for ID ");
+            }
+         
+            try {
+              
+                downloadCSV2(); 
+                // Attempt to download table for the current ID
+            } catch (error) {
+                console.log("Error downloading table for ID ");
+            }
+        }
+        function downloadCSV2() {
+        // Retrieve table data
+        var table = $('#PCIeTable');
+        var rows = table.find('tr');
+
+        // Prepare CSV content
+        var csvContent = "data:text/csv;charset=utf-8,";
+
+        // Header row
+        var headerRow = [];
+        table.find('th').each(function() {
+            headerRow.push($(this).text());
+        });
+        csvContent += headerRow.join(",") + "\n";
+
+        // Data rows
+        rows.each(function() {
+            var rowData = [];
+            $(this).find('td').each(function() {
+                rowData.push($(this).text());
+            });
+            csvContent += rowData.join(",") + "\n";
+        });
+
+        // Create a temporary link and trigger download
+        var encodedUri = encodeURI(csvContent);
+        var link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "PCIeTable.csv");
+        document.body.appendChild(link); // Required for Firefox
+        link.click();
+        }
+
+    function downloadCSV1() {
+    // Retrieve table data
+    var table = $('#dimmTable');
+    var rows = table.find('tr');
+    
+    // Prepare CSV content
+    var csvContent = "data:text/csv;charset=utf-8,";
+
+    // Header row
+    var headerRow = [];
+    table.find('th').each(function() {
+        headerRow.push($(this).text());
+    });
+    csvContent += headerRow.join(",") + "\n";
+
+    // Data rows
+    rows.each(function() {
+        var rowData = [];
+        $(this).find('td').each(function() {
+            rowData.push($(this).text());
+        });
+        csvContent += rowData.join(",") + "\n";
+    });
+
+    // Create a temporary link and trigger download
+    var encodedUri = encodeURI(csvContent);
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "dimmTable.csv");
+    document.body.appendChild(link); // Required for Firefox
+    link.click();
+}
+
+
+    function downloadCSV(id,name) {
+        // Retrieve table data
+        var table = document.getElementById(id);
+        var rows = table.querySelectorAll("tbody tr");
+        
+        // Prepare CSV content
+        var csvContent = "data:text/csv;charset=utf-8,";
+
+        // Header row
+        var headerRow = [];
+        table.querySelectorAll("thead th").forEach(function(th) {
+            headerRow.push(th.innerText);
+        });
+        csvContent += headerRow.join(",") + "\n";
+
+        // Data rows
+        rows.forEach(function(row) {
+            var rowData = [];
+            row.querySelectorAll("td").forEach(function(cell) {
+                rowData.push(cell.innerText);
+            });
+            csvContent += rowData.join(",") + "\n";
+        });
+
+        // Create a temporary link and trigger download
+        var encodedUri = encodeURI(csvContent);
+        var link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `${name}.csv`);
+        document.body.appendChild(link); // Required for Firefox
+        link.click();
+    }
+
+
+    $(document).ready(function () {
+        
+    
+        filterTableByColumn()
+        function closeModal(ip) {
+            
+            $('#myModal').modal('hide');
+        }
+           
+        function getData_dimm(ip,wanted_path) {
+            console.log("ip== ",ip)
+        
+            // Make an AJAX request to the Flask route for fetching data
+            fetch(`/get_data/${ip}/${wanted_path}`)
+                .then(response => response.json())
+                .then(data => displayData1(data,ip))
+                .catch(error => console.error('Error:', error));
+         }
+         function getData_pci(ip,wanted_path) {
+            console.log("ip== ",ip)
+        
+            // Make an AJAX request to the Flask route for fetching data
+            fetch(`/get_data_pci/${ip}/${wanted_path}`)
+                .then(response => response.json())
+                .then(data => displayData2(data,ip))
+                .catch(error => console.error('Error:', error));
+         }
+         function openModal1(data, ip) {
+            // Update the modal content with the fetched data
+           
+            console.log("data= ",data[0]['@odata.id'])
+            console.log("length== ",data.length)
+           
+            var modalBody = $('#modal-body-content');
+            modalBody.html('<p>Details for BMC IP: ' + ip + '</p>');
+        
+            // Create a table to display the JSON data
+            var table = $('<table id="dimmTable" class="table table-striped"></table>');
+            var tableHeadRow = $('<tr></tr>');
+        
+            // Assuming data is an object (not an array)
+            dimm_Naming_headings=['ServiceLabel','BaseModuleType','CapacityMiB','Manufacturer','MemoryDeviceType','MemoryType','RankCount',"PartNumber","Status"]
+            dimm_headings=['Location.PartLocation.ServiceLabel','BaseModuleType','CapacityMiB','Manufacturer','MemoryDeviceType','MemoryType','RankCount','PartNumber','Status.State']
+            for (let i=0;i<dimm_headings.length;i++) {
+                console.log("heading= ",dimm_headings[i])
+                tableHeadRow.append('<th>' + dimm_Naming_headings[i] + '</th>');
+            }
+            
+            table.append(tableHeadRow);
+           
+            for(var row=0;row<data.length;row++)
+            {
+                var tableDataRow = $('<tr></tr>');
+                for(var head=0;head<dimm_headings.length;head++)
+                {
+                    var value=data[row][dimm_headings[head]];
+                    tableDataRow.append('<td>' + value + '</td>');
+                }
+                table.append(tableDataRow);
+            }
+            modalBody.append(table);
+            $('#myModal').modal('show');
+            var table = $('#myModal').find('table');
+            var tableHeight = table.outerHeight();
+            var modalDialog = $('#myModal').find('.modal-dialog');
+            modalDialog.height(tableHeight);
+        }
+            function openModal2(data, ip) {
+                // Update the modal content with the fetched data
+                console.log("Data== ",data)
+                console.log("data= ",data[0]['@odata.id'])
+                console.log("length== ",data.length)
+                
+                var modalBody = $('#modal-body-content');
+                modalBody.html('<p>Details for BMC IP: ' + ip + '</p>');
+            
+                // Create a table to display the JSON data
+                var table = $('<table id="PCIeTable" class="table table-striped"></table>');
+                var tableHeadRow = $('<tr></tr>');
+            
+                // Assuming data is an object (not an array)
+                dimm_Naming_headings=['BDF','PCI Speed','Card Name','Manufacturer','DeviceClass','DeviceId','VendorId',"Status"]
+                dimm_headings=['Id','PCIeInterface.PCIeType','PCI Card Name','Manufacturer','DeviceClass','DeviceId','VendorId','Status.State']
+                for (let i=0;i<dimm_headings.length;i++) {
+                    console.log("heading= ",dimm_headings[i])
+                    tableHeadRow.append('<th>' + dimm_Naming_headings[i] + '</th>');
+                }
+                
+                table.append(tableHeadRow);
+               
+                for(var row=0;row<data.length;row++)
+                {
+                    var tableDataRow = $('<tr></tr>');
+                    for(var head=0;head<dimm_headings.length;head++)
+                    {
+                        var value=data[row][dimm_headings[head]];
+                        tableDataRow.append('<td>' + value + '</td>');
+                    }
+                    table.append(tableDataRow);
+                }
+        
+                modalBody.append(table);
+                $('#myModal').modal('show');
+                var table = $('#myModal').find('table');
+                var tableHeight = table.outerHeight();
+                var modalDialog = $('#myModal').find('.modal-dialog');
+                modalDialog.height(tableHeight);
+            }
+            
+        
+        
+        function displayData1(data,ip) {
+            console.log("ip== ",ip)
+            console.log("data== ",data[0])
+            console.log('data.length= ',data.length)
+            if (data.length==0)
+                alert(`No Dimm Data found for IP : ${ip}`)
+            openModal1(data,ip);    
+
+        }
+        function displayData2(data,ip) {
+            console.log("ip== ",ip)
+            console.log("data== ",data[0])
+            console.log('data.length= ',data.length)
+            if (data.length==0)
+                alert(`No PCIe Data found for IP : ${ip}`)
+            openModal2(data,ip);
+
+        }
+
+
+
+        // Attach a click event to all elements with the 'open-modal' class
+        $('.open-modal1').click(function (event) {
+            event.preventDefault();
+            var ip = $(this).data('ip');
+            var wanted_path = $(this).data('wanted_path');
+            getData_dimm(ip,wanted_path)
+           
+        });
+        $('.open-modal2').click(function (event) {
+            event.preventDefault();
+            var ip = $(this).data('ip');
+            var wanted_path = $(this).data('wanted_path');
+            getData_pci(ip,wanted_path)
+           
+        });
+        $('.close').click(function (event) {
+            event.preventDefault();
+            var ip = $(this).data('ip');
+            closeModal(ip);
+        });
+    });
+    //javascript to handle date and time
+    $(document).ready(function(){
+        $('.datetimepicker').datetimepicker({
+            timeFormat: 'HH:mm',
+            dateFormat: 'yy-mm-dd',
+            controlType: 'select',
+            oneLine: true
+        });
+     });
+  
+    
+</script>
+
+<!-- ... (remaining code) ... -->
+
+
+{% endblock %}

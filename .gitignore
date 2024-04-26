@@ -1,0 +1,12 @@
+instance/*
+__pycache__/*
+pcmd_app/__pycache__/*
+pcmd_app/api/__pycache__/*
+pcmd_app/auth/__pycache__/*
+pcmd_app/web/__pycache__/*
+pcmd_app/utils/__pycache__/*
+pcmd_app/uploads/profile_img/*
+!instance/readme.txt
+!pcmd_app/uploads/profile_img/readme.txt
+env/*
+database/*

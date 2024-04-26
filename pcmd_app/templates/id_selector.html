@@ -1,0 +1,364 @@
+{% extends 'main.html' %}
+{% block page_title %} PCMD - Home {% endblock %}
+{% block content_container %}
+
+<form action="{{ url_for('web.send_data_for_query') }}" method="post">
+
+
+    <div style="max-height: 800px; max-width: 2000px; overflow-y: auto;">
+        <div style="justify-content: center; text-align: center;">
+            <input type="text" id="myInput" onkeyup="searchTableColumns()" placeholder="Search required field here.." style="width:400px;">
+        </div>
+        
+        <table id="myTable" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    {% for column in columns %}
+                        <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for index, row in df.iterrows() %}
+                    <tr id="{{ index }}" {% if index >= 5 %} style="display: none;" {% endif %}>
+                        <td><input type="checkbox" name="selected_rows[]" value="{{ index }}"></td>
+                        {% for value in row %}
+                            <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <button class="btn btn-lg btn-success col-xs-12 col-md-4 my-3 mx-4"  style="width:200px">Check HW</button>
+    <div id="paginationLinks" style="text-align: center; margin-top: 10px;"></div>
+</form>
+<script>
+    
+    $(document).ready(function() {
+        var rowsPerPage = 5;
+        var numRows = $('#myTable tbody tr').length;
+        var numPages = Math.ceil(numRows / rowsPerPage);
+        
+        // Generate pagination links
+        for (var i = 1; i <= numPages; i++) {
+            $('#paginationLinks').append('<a href="#" onclick="showPage(' + i + ')">' + i + '</a>&nbsp;');
+        }
+    });
+
+    function showPage(pageNum) {
+        var rowsPerPage = 5;
+        var startIndex = (pageNum - 1) * rowsPerPage;
+        var endIndex = startIndex + rowsPerPage;
+        
+        // Show/hide rows based on page number
+        $('#myTable tbody tr').each(function(index) {
+            if (index >= startIndex && index < endIndex) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    }
+
+    function searchTableColumns() {
+        var input, filter, table, tr, i, j, column_length, count_td;
+        column_length = document.getElementById('myTable').rows[0].cells.length;
+        input = document.getElementById("myInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("myTable");
+        tr = table.getElementsByTagName("tr");
+
+        for (i = 1; i < tr.length; i++) {
+            td = tr[i];
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+    function searchTableColumnsbyId() {
+        var input, filter, table, tr, i, j, column_length, count_td;
+        column_length = document.getElementById('myTable').rows[0].cells.length;
+        input = document.getElementById("myInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("myTable");
+        tr = table.getElementsByTagName("tr");
+
+        for (i = 1; i < tr.length; i++) {
+            td = tr[i];
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+    document.getElementById('idSelector').addEventListener('change', function() {
+        document.getElementById('dataForm').submit();
+    });
+    // Initialize Select2 on the dropdown
+   
+    // Additional JavaScript code can go here
+    var lastSelectedId = localStorage.getItem('lastSelectedId');
+    if (lastSelectedId) {
+        idSelector.val(lastSelectedId).trigger('change');
+    }
+
+    // Additional JavaScript code can go here
+
+    document.getElementById('idSelector').addEventListener('change', function() {
+        // Store the selected item in localStorage
+        localStorage.setItem('lastSelectedId', idSelector.val());
+
+        document.getElementById('dataForm').submit();
+    });
+    /*
+    function getData() {
+        var selectedId = document.getElementById('idSelector').value;
+    
+        // Make an AJAX request to the Flask route for fetching data
+        fetch(`/get_data/${selectedId}`)
+            .then(response => response.json())
+            .then(data => displayData(data))
+            .catch(error => console.error('Error:', error));
+    }
+    
+    function displayData(data) {
+        var dataContainer = document.getElementById('dataContainer');
+        dataContainer.innerHTML = ''; // Clear previous data
+    
+        // Create a table to display the fetched data
+        var table = document.createElement('table');
+        var headerRow = table.insertRow(0);
+    
+        // Assuming data is an array of objects
+        for (var key in data[0]) {
+            var th = document.createElement('th');
+            th.textContent = key;
+            headerRow.appendChild(th);
+        }
+    
+        for (var i = 0; i < data.length; i++) {
+            var row = table.insertRow(i + 1);
+    
+            for (var key in data[i]) {
+                var cell = row.insertCell();
+                cell.textContent = data[i][key];
+            }
+        }
+    
+        dataContainer.appendChild(table);
+    }
+    */
+    $(document).ready(function(){
+        $('.datetimepicker').datetimepicker({
+            timeFormat: 'HH:mm',
+            dateFormat: 'yy-mm-dd',
+            controlType: 'select',
+            oneLine: true
+        });
+     });
+    // JavaScript to handle row selection with checkboxes
+    
+    document.addEventListener("DOMContentLoaded", function () {
+        var selectedRows = [];
+
+        function updateSelectedRows() {
+            document.getElementById("selected-rows").value = selectedRows.join(",");
+        }
+
+        function toggleRowSelection(row) {
+            var index = selectedRows.indexOf(row);
+            if (index === -1) {
+                selectedRows.push(row);
+                document.getElementById(row).classList.add("selected-row");
+            } else {
+                selectedRows.splice(index, 1);
+                document.getElementById(row).classList.remove("selected-row");
+            }
+            updateSelectedRows();
+        }
+
+        document.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
+            checkbox.addEventListener("change", function () {
+                toggleRowSelection(checkbox.value);
+            });
+        });
+    });
+
+    $(document).ready(function () {
+        
+    
+        
+        function closeModal(ip) {
+            
+            $('#myModal').modal('hide');
+        }
+           
+        function getData_dimm(ip) {
+            console.log("ip== ",ip)
+        
+            // Make an AJAX request to the Flask route for fetching data
+            fetch(`/get_data/${ip}`)
+                .then(response => response.json())
+                .then(data => displayData1(data,ip))
+                .catch(error => console.error('Error:', error));
+         }
+         function getData_pci(ip) {
+            console.log("ip== ",ip)
+        
+            // Make an AJAX request to the Flask route for fetching data
+            fetch(`/get_data_pci/${ip}`)
+                .then(response => response.json())
+                .then(data => displayData2(data,ip))
+                .catch(error => console.error('Error:', error));
+         }
+         function openModal1(data, ip) {
+            // Update the modal content with the fetched data
+           
+            console.log("data= ",data[0]['@odata.id'])
+            console.log("length== ",data.length)
+           
+            var modalBody = $('#modal-body-content');
+            modalBody.html('<p>Details for BMC IP: ' + ip + '</p>');
+        
+            // Create a table to display the JSON data
+            var table = $('<table class="table table-striped"></table>');
+            var tableHeadRow = $('<tr></tr>');
+        
+            // Assuming data is an object (not an array)
+            dimm_Naming_headings=['ServiceLabel','BaseModuleType','CapacityMiB','Manufacturer','MemoryDeviceType','MemoryType','RankCount',"Status"]
+            dimm_headings=['Location.PartLocation.ServiceLabel','BaseModuleType','CapacityMiB','Manufacturer','MemoryDeviceType','MemoryType','RankCount','Status.State']
+            for (let i=0;i<dimm_headings.length;i++) {
+                console.log("heading= ",dimm_headings[i])
+                tableHeadRow.append('<th>' + dimm_Naming_headings[i] + '</th>');
+            }
+            
+            table.append(tableHeadRow);
+           
+            for(var row=0;row<data.length;row++)
+            {
+                var tableDataRow = $('<tr></tr>');
+                for(var head=0;head<dimm_headings.length;head++)
+                {
+                    var value=data[row][dimm_headings[head]];
+                    tableDataRow.append('<td>' + value + '</td>');
+                }
+                table.append(tableDataRow);
+            }
+            modalBody.append(table);
+            $('#myModal').modal('show');
+            var table = $('#myModal').find('table');
+            var tableHeight = table.outerHeight();
+            var modalDialog = $('#myModal').find('.modal-dialog');
+            modalDialog.height(tableHeight);
+        }
+            function openModal2(data, ip) {
+                // Update the modal content with the fetched data
+               
+                console.log("data= ",data[0]['@odata.id'])
+                console.log("length== ",data.length)
+                
+                var modalBody = $('#modal-body-content');
+                modalBody.html('<p>Details for BMC IP: ' + ip + '</p>');
+            
+                // Create a table to display the JSON data
+                var table = $('<table class="table table-striped"></table>');
+                var tableHeadRow = $('<tr></tr>');
+            
+                // Assuming data is an object (not an array)
+                dimm_Naming_headings=['BDF','PCI Speed','Card Name','Manufacturer','DeviceClass','DeviceId','VendorId',"Status"]
+                dimm_headings=['Id','PCIeInterface.PCIeType','PCI Card Name','Manufacturer','DeviceClass','DeviceId','VendorId','Status.State']
+                for (let i=0;i<dimm_headings.length;i++) {
+                    console.log("heading= ",dimm_headings[i])
+                    tableHeadRow.append('<th>' + dimm_Naming_headings[i] + '</th>');
+                }
+                
+                table.append(tableHeadRow);
+               
+                for(var row=0;row<data.length;row++)
+                {
+                    var tableDataRow = $('<tr></tr>');
+                    for(var head=0;head<dimm_headings.length;head++)
+                    {
+                        var value=data[row][dimm_headings[head]];
+                        tableDataRow.append('<td>' + value + '</td>');
+                    }
+                    table.append(tableDataRow);
+                }
+        
+                modalBody.append(table);
+                $('#myModal').modal('show');
+                var table = $('#myModal').find('table');
+                var tableHeight = table.outerHeight();
+                var modalDialog = $('#myModal').find('.modal-dialog');
+                modalDialog.height(tableHeight);
+            }
+            
+        
+        
+        function displayData1(data,ip) {
+            console.log("ip== ",ip)
+            console.log("data== ",data[0])
+            console.log('data.length= ',data.length)
+            if (data.length==0)
+                alert(`No PCIe Data found for IP : ${ip}`)
+            openModal1(data,ip);    
+
+        }
+        function displayData2(data,ip) {
+            console.log("ip== ",ip)
+            console.log("data== ",data[0])
+            console.log('data.length= ',data.length)
+            if (data.length==0)
+                alert(`No PCIe Data found for IP : ${ip}`)
+            openModal2(data,ip);
+
+        }
+
+
+
+        // Attach a click event to all elements with the 'open-modal' class
+        $('.open-modal1').click(function (event) {
+            event.preventDefault();
+            var ip = $(this).data('ip');
+           
+            getData_dimm(ip)
+           
+        });
+        $('.open-modal2').click(function (event) {
+            event.preventDefault();
+            var ip = $(this).data('ip');
+            getData_pci(ip)
+           
+        });
+        $('.close').click(function (event) {
+            event.preventDefault();
+            var ip = $(this).data('ip');
+            closeModal(ip);
+        });
+    });
+    //javascript to handle date and time
+    $(document).ready(function(){
+        $('.datetimepicker').datetimepicker({
+            timeFormat: 'HH:mm',
+            dateFormat: 'yy-mm-dd',
+            controlType: 'select',
+            oneLine: true
+        });
+     });
+
+
+
+
+</script>
+{% endblock %}

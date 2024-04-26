@@ -1,0 +1,62 @@
+{% extends 'main.html' %}
+{% block page_title %} PCMD - Login {% endblock %}
+{% block content_container %}
+<div class="row">
+  <div class="col-xs-12 col-md-8 col-lg-6 mx-auto">
+    <div class="card shadow">
+      <div class="card-header text-center">
+        <h5> PCMD Login</h5>
+      </div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('auth.login') }}" id="user_form" role="form" onsubmit="enc_km()">
+          {{ form.csrf_token }}
+          <div class=" mb-3">
+            {{ form.email(class="form-control form-control-lg",placeholder = "Enter your Email") }}
+          </div>
+          <div class=" mb-3">
+            {{ form.password(class="form-control form-control-lg", id="password", placeholder="Enter your password") }}
+          </div>
+          <div class="row mb-3 justify-content-center">
+            <button type="submit" class="btn btn-lg btn-success col-xs-12 col-md-4">Submit</button>
+          </div>        
+        </form>
+        <div class="row text-center">
+          <div class="col-12">
+            New User? Sign-up <a href="/signup" class="text-decoration-none">here.</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class=" mt-4 row ">
+  <div class="col-12 text-primary p-3">
+    Please Log-in with your current Intel Email and Password. The tool directly passes the user provided credentials to Intel's LDAP server for verification. That way we don't have to store user passwords and secrets on our side at all.
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.0.0/jsencrypt.min.js"></script>
+<script>
+  function enc_km(){
+    user_form = document.getElementById("user_form")
+    var encrypt = new JSEncrypt();
+  encrypt.setPublicKey(`-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC/YaFS3JXaXqFfC2u/+3hH2c8E
+VZi9ygEOa2gQ37zDosMpuYWxYOgv+FjT7PF/HqiUXAWcylMa44In2apeOTG9vQ1a
+Z8sL1dFNjeZ/61nZI5+kmmOoQd7AV7/Q7mJ8h24sPsW6E+bTGPdaoWhP4+XogBSY
+XmubQjTpwLLClUEIxQIDAQAB
+-----END PUBLIC KEY-----`);
+  var message = document.getElementById("password").value;
+  var encrypted = encrypt.encrypt(message);
+  document.getElementById("password").value=encrypted
+  if(user_form.checkValidity()){
+    return True;
+  } else {
+    return False;
+  }
+
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,572 @@
+{% extends 'main.html' %}
+{% block page_title %} PCMD - Home {% endblock %}
+
+
+
+{% block nav_dropdown %}
+<style>
+    #myDiv {
+        display: none;
+    }
+    .spinner{
+        height: 50px;
+        width: 50px;
+        background-color: white;
+        border-radius: 50%;
+        border: 10px solid #fff;
+        border-top-color: #007bff;
+        animation: spin 1s linear infinite;
+        align-items: center;
+        align-content: center;
+        text-align: center;
+        }   
+        @keyframes spin {
+            0%{
+                transform: rotate(0deg);
+            }
+            100%{
+                transform: rotate(360deg);
+            }
+            
+        }
+        #progressBar {
+            width: 1300px;
+            height: 8px;
+            background-color: lightgray;
+            display: none;
+            border-radius: 10px;
+        }
+        #progress {
+            width: 0%;
+            height: 8px;
+            background-color: green;
+            border-radius: 10px;
+        }
+        #percentshow{
+            display: none;
+            
+        }
+        input[type="radio"] {
+            /* Default color for radio buttons */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            border: 2px solid #bebebe;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Orange color for radio button when the "Orange" option is selected */
+       
+        #orangeQuery:checked {
+            background-color: orange;
+            border-color: orange;
+        }
+        .card-button {
+        display: flex;
+        align-items: center;
+    }
+    .card-button {
+    display: flex;
+    align-items: center;
+    position: relative; /* Ensure proper positioning of pseudo-elements */
+}
+
+
+
+.hidden_class{
+    display: none;
+}
+
+        /* Blue color for radio button when the "Blue" option is selected */
+      
+</style>
+
+<div class="dropdown">
+    <!-- <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown"
+      aria-haspopup="true" aria-expanded="false">
+      Statistics
+    </button> -->
+    <ul class="dropdown-menu" style=" white-space: nowrap;" aria-labelledby="dropdownMenuButton">
+      <li>
+        <p class="px-2 text-center"><strong>Today's Statistics</strong></p>
+      </li>
+      <li>
+        <hr class="dropdown-divider">
+      </li>
+      <li>
+        <p class="px-2">Hits: {{statistics_data['today_hits']}}</p>
+      </li>
+      <li>
+        <hr class="dropdown-divider">
+      </li>
+      <li>
+        <p class="px-2">Unique Hits: {{statistics_data['today_unique_hits']}}</p>
+      </li>
+      <li>
+        <hr class="dropdown-divider">
+      </li>
+      <li>
+        <p class="px-2 text-center"><strong>Total Statistics</strong></p>
+      </li>
+      <li>
+        <hr class="dropdown-divider">
+      </li>
+      <li>
+        <p class="px-2">Hits: {{statistics_data['total_hits']}}</p>
+      </li>
+    </ul>
+</div>
+
+{% endblock %}
+{% block content_container %}
+<form method="post" action="{{ url_for('web.show_hw') }}" id="getHwDataForm" >
+    <input type="hidden" id="selected_project" name="selected_project"></input>
+</form>
+  <div class="d-flex justify-content-center align-items-center my-3" style="align-items: center;text-align: center; justify-content: center;">
+    <div id="myDiv" class="spinner" >
+        <div id="pp" ></div>
+    </div>    
+  </div>
+
+<div id="cards" style="padding-top: 20px;">
+    <div id="card1" class="card" style="width: 100%; height: 100%; ">
+        <div class="card-header" style="text-align: center; font-family: 'Arial Black', sans-serif; font-size: 1em; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">
+            Welcome to PCMD TOOL
+        </div>
+        
+        <div class="card-body">
+                <form method="post" id="predefinedForm"   slot="mb-3" action="{{ url_for('web.pcmd_dashboard')}}" style="max-width: 600px; margin: auto;">
+                    <input type="hidden" name="manual" value="no" >
+
+                    <div id="projectSelectorContainer" class="mb-3 my-10 d-flex align-items-center">
+                        <select id="projectSelector"  class="form-select flex-grow-1 me-2">
+                        <option value="">Select a project...</option>
+                        {% for project_name, details in supported_projects.items() %}
+                            <option value="{{ project_name }}">{{ project_name }}</option>
+                        {% endfor %}
+                        </select>
+                        
+                        <button class="btn btn-primary btn-sm me-2" id="getDataButton" style="width: 170px;height: 40px;display: none;" onclick="submitForm1()">Get HW Data</button>
+                        
+                        <div id="updateButton" style="display: none;" >
+                        <button class="btn btn-primary btn-sm" type="button" id="repo_update_button" style="width: 120px;height: 40px;">Update Now</button>
+                        </div>
+                    </div>
+                  
+                    
+                    <div class="d-flex justify-content-center align-items-center my-3" id="master_update_status" >
+                        <div class="p-1" id="updateText" style="display: none;">
+                            Last Refreshed On: <span id="last_update_time_span" class="fw-bolder">{{repo_stats["last_refreshed_at"]}}</span>
+                        </div>
+                       
+                        <div class="centered-div">
+                            <h2></h2>
+                            <div id="log-container">
+                                <div id="log-content">
+                                    <!-- Your log content goes here -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-1">
+                            <span id="repo_update_fail_output" class="text-danger"></span>
+                            <span id="repo_update_success_output" class="text-success"></span>
+                
+                        </div>
+                    </div>
+                  
+                
+                        <div class="button-container"  style="display: flex; justify-content: center;">
+                            <div id="InputTypeSelection" style="display: none;">
+                                <div class="card-button mx-2" id="predefined" style="display: inline-block; margin-left: 10px;">
+                                    <input class="form-check-input" type="radio" name="radio_options3" id="predefined" checked>
+                                    <label class="form-check-label" for="predefined">Pre-defined</label>
+                                </div>
+                                <div class="form-check" id="manual" style="display: inline-block; margin-left: 10px">
+                                    <input class="form-check-input" type="radio" name="radio_options3" id="manual">
+                                    <label class="form-check-label" for="manual">Manual</label>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="radio_options" value="option2" >
+                        
+            
+                    
+                    <div id="predefinedSelection" >    
+                
+                    
+                        <div id="articleIdInput" class="form-group mb-3" style="display: none;padding-left: 500px;">
+                            <label for="articleId" class="form-label">Article/Test case Id :</label>
+                            <input type="text" class="form-control" style="width: 350px;" name="articleId">
+                        </div>
+                
+                        <div id="querySelector" class="mb-3 " style="display: none; padding-left: 33%;">
+                            
+                            <div class="form-check" style="display: inline-block; margin-left: 10px;">
+                                <input class="form-check-input" type="radio" name="querytype1" id="orangeQuery"  value="Orange" checked>
+                                <label class="form-check-label" for="orangeQuery">Orange</label>
+                            </div>
+                            <div class="form-check" style="display: inline-block; margin-left: 10px;">
+                                <input class="form-check-input" type="radio" name="querytype1" id="blueQuery" value="Blue" >
+                                <label class="form-check-label" for="blueQuery">Blue</label>
+                            </div>
+                        </div>
+                    
+                    <div id="queryId2" style="display: none;">  
+                        <div  class="mb-3" style="justify-content: center;padding-left: 20%;padding-right: 20%;">
+                            <label for="queryType" class="form-label">Select Query :</label>
+                            <select id="queryIds" name="queryIds" class="form-select">
+                            </select>
+                        </div>
+                    </div>  
+                    <div class="text-center">
+                        <button type="submit" id="submitButton2" class="btn btn-success my-3">Submit</button>
+                    </div>
+                    
+                </div>
+                
+            </form>
+            <form method="post" id="predefinedForm"   slot="mb-3" action="{{ url_for('web.pcmd_dashboard')}}" style="max-width: 600px; margin: auto;">
+                    <div class="card-body" id="manualForm" style="display: none;">
+                        <div id="queryId" class="mb-3" style="display: flex; flex-direction: column; align-items: center;">
+                            <div class="form-group">
+                                <label for="queryType" class="form-label">Query Id:</label>
+                                <input type="text" class="form-control" style="width: 350px;" name="queryIds">
+                            </div>
+                            <div class="form-group">
+                                <label for="queryType" class="form-label">Article/Test case Id :</label>
+                                <input type="text" class="form-control" style="width: 350px;" name="articleId">
+                            </div>
+                            <input type="hidden" name="radio_options" value="option2" >
+                            <button type="submit" id="submitButton" class="btn btn-success my-3">Submit</button>
+                        </div>
+                    </div>
+                </form>
+                </div>
+                
+            
+                
+        </div>                   
+    </div>
+</div>
+<form id="executionForm" method="post" action="{{ url_for('web.TestCaseExecution') }}">
+    <input type="hidden" value="{{query_id}}" >
+</form>    
+             
+
+<script>
+
+   
+    document.getElementById("getDataButton").addEventListener("click", function(event) {
+        event.preventDefault(); // Prevent default button behavior
+        document.getElementById("getHwDataForm").submit();
+    });
+   
+      
+            const projectSelectorContainer=document.getElementById('projectSelectorContainer')
+            const radioOptions=document.getElementById('radioOptions')
+            const querySelector=document.getElementById('querySelector')
+            const articleIdInput=document.getElementById('articleIdInput')
+            const queryId=document.getElementById('queryId2')
+            const updateText=document.getElementById('updateText')
+            const updateButton=document.getElementById('updateButton')
+            const querid1=document.getElementById('querid1')
+            const articleid1=document.getElementById('articleid1')
+            const heading=document.getElementById('heading')
+            const welcomeContent=document.getElementById('welcomeContent')
+            const welcomeContent1=document.getElementById('welcomeContent1')
+            const selectedProject=document.getElementById('selectedProject')
+            const manual= document.getElementById('manual')
+            const predefined=document.getElementById('predefined')
+            const manualForm=document.getElementById('manualForm')
+            const predefinedForm=document.getElementById('predefinedForm')
+            const submitButton2=document.getElementById('submitButton2')
+            const getHwData=document.getElementById('getHwData')
+            const getDataButton=document.getElementById('getDataButton')
+            const  master_update_status1=document.getElementById('master_update_status')
+            const InputTypeSelection=document.getElementById('InputTypeSelection')
+            const predefinedSelection=document.getElementById('predefinedSelection');
+            
+            predefined.addEventListener('click',function(){
+                // this.classList.remove('btn-primary')
+                // this.classList.remove('btn-primary')
+                console.log("clicne din predefined")
+                this.disabled=true;
+                manual.disabled=false;
+                
+
+                predefinedForm.style.display='block';
+                predefinedSelection.style.display='block';
+                projectSelectorContainer.style.display='block';
+                manualForm.style.display='none';
+                if (projectSelector.value === 'GNR-AP') {
+                updateButton.style.display='block';
+                getDataButton.style.display='block';
+                
+                }
+            })
+            manual.addEventListener('click',function(){
+                console.log('displaying the manual')
+                manualForm.style.display='block';
+                predefinedSelection.style.display='none';
+                getDataButton.style.display='block';
+                
+            })
+
+            
+        document.addEventListener('DOMContentLoaded', function () {
+            var predefinedRadio = document.getElementById('predefined');
+            var manualRadio = document.getElementById('manual');
+            var card1 = document.getElementById('card1');
+            var card2 = document.getElementById('card2');
+
+            predefinedRadio.addEventListener('change', function () {
+                card1.style.display = 'block';
+                
+                
+            });
+
+            manualRadio.addEventListener('change', function () {
+                manualForm.style.display='block';
+            });
+        });
+
+            const orangeQuery = document.getElementById("orangeQuery");
+            const blueQuery =  document.getElementById("blueQuery");
+            orangeQuery.addEventListener("change", function() {
+                console.log("Orange")
+               
+                populateOptions("Orange")
+              
+
+            });
+    
+            blueQuery.addEventListener("change", function() {
+                console.log("Blue")
+               
+                populateOptions("Blue")
+                
+
+                
+            });
+            
+    
+            projectSelectorContainer.addEventListener("change", function() {
+              
+                if (projectSelector.value === 'GNR-AP') {
+                    InputTypeSelection.style.display='block';
+                    populateOptions("Orange")
+                    console.log("inside projectSelectorContainer")
+                    querySelector.style.display='block';
+                    queryId.style.display='block';
+                    updateText.style.display='block';
+                    updateButton.style.display='block';
+                    getDataButton.style.display='block';
+                   
+                   
+                    
+                } else {
+                    querySelector.style.display='none';
+                    queryId.style.display='none';
+                    updateText.style.display='none';
+                    updateButton.style.display='none';
+                    querid1.style.display='none';
+                    articleid1.style.display='none';
+                    getDataButton.style.display='none';
+                    
+                }    
+               
+                   
+                
+            });
+            
+
+            const projectSelector = document.getElementById('projectSelector');
+            projectSelector.addEventListener('change', function() {
+                console.log("project name== ",projectSelector.value);
+                document.getElementById("selected_project").value = projectSelector.value;
+                console.log("hidden value: ",document.getElementById('selected_project').value)
+                if (projectSelector.value === 'GNR-AP') {
+                    querySelector.style.display='block';
+                } else {
+                    // console.log("project name sffdf== ");
+                    querySelector.style.display='none';
+                    
+                  
+                }
+            });
+
+
+           
+           
+
+            // Function to populate options based on queryType selection
+            function populateOptions(queryTypeSelect) {
+               
+
+                //var queryTypeSelect = document.getElementById("queryType");
+                var queryIdOrangeSelect = document.getElementById("queryIds");
+                var selectedValue = queryTypeSelect;
+                let options;
+
+                if (selectedValue === "Orange" ) {
+                    console.log('inside the Orange one');
+                   
+                    fetch('/get_blue_query')
+                        .then(response => response.json())
+                        .then(data => {
+                            //console.log("length== ", data['blue'].length, typeof data['blue'])
+                            list2 = data['Orange'].map(item => item['TCD Query Name']);
+                            list1_val = data['Orange'].map(item => item['TCD Query']);
+                            // console.log("list2== ", list2);
+                            options = list2;
+                            populateSelectOptions(options, queryIdOrangeSelect); // Call function to populate options
+                        });
+                    return; 
+
+                    
+                } else {
+                    console.log('inside the blue one');
+                    fetch('/get_blue_query')
+                        .then(response => response.json())
+                        .then(data => {
+                            //console.log("length== ", data['blue'].length, typeof data['blue'])
+                            list2 = data['Blue'].map(item => item['TCD Query Name']);
+                            list1_val = data['Blue'].map(item => item['TCD Query']);
+                            // console.log("list2== ", list2);
+                            options = list2;
+                            populateSelectOptions(options, queryIdOrangeSelect); // Call function to populate options
+                        });
+                    return; // Return here to avoid populating options before list2 is populated
+                }
+                populateSelectOptions(options, queryIdOrangeSelect); // Call function to populate options
+            }
+
+            // Function to populate select options
+            function populateSelectOptions(options, selectElement) {
+                console.log("Pupating selections")
+                // Clear existing options
+                selectElement.innerHTML = "";
+                // Populate options
+                // Populate options using a for loop
+                for (var i = 0; i < options.length; i++) {
+                    var option = options[i];
+                    var value=list1_val[i]
+                    var optionElement = document.createElement("option");
+                    // var remainingStr = value.substring(8);
+                    optionElement.value = value.substring(8);
+                    optionElement.textContent = value.substring(8)+" - "+ option;
+                    selectElement.appendChild(optionElement);
+                }
+            }
+
+            // Event listener to trigger populateOptions function on queryType change
+            //document.getElementById("queryType").addEventListener('change', populateOptions);
+            
+         
+            // Initially populate options based on default selection
+            
+
+
+       
+    </script>
+    
+
+    <script>
+         $(document).ready(function() {
+            $('#getDataButton').click(function() {
+            $('#myDiv').toggle();
+            });
+            $('#submitButton').click(function() {
+            $('#myDiv').toggle();
+            });
+            $('#submitButton2').click(function() {
+            $('#myDiv').toggle();
+            });
+            $('#getDataButton').on('click', toggleMyDiv);
+
+            // Remove the click event listener when navigating away from the page
+            $(window).on('unload', function() {
+                $('#getDataButton').off('click', toggleMyDiv);
+            });
+         });
+        
+         function master_update_status() {
+            percent=0
+            console.log("inside button master_update_status")
+            var progress1 = document.getElementById('progress');
+            var progressBar1=document.getElementById('progressBar')
+            var percent_show1=document.getElementById('percentshow')
+            progressBar1.style.display ='block'
+            percent_show1.style.display='block'
+           
+            var width = 0;
+            var interval = setInterval(function() {
+                fetch(`/progress1/${percent}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("checking progress= ",data )
+                        status=data['progress']
+                      
+                        progress1.style.width = status + '%';
+                        percent=status    
+                        document.querySelector('#percentshow').textContent=percent+"%";
+                        if (width >= 100) {
+                            clearInterval(interval);    
+                        }
+                    });
+            }, 1000); // Check progress every 1 second
+         }
+        document.querySelector('#repo_update_button').addEventListener('click',function(){
+           
+          
+            fetch('/get_time_to_update').then(response=>response.json()).then(data =>{
+                let confirmed=confirm(`Warning update will take approx 1-2 minutes!! Press OK to Continue..`)
+                if(confirmed)
+                {
+                    // master_update_status()
+                    update_repo()
+
+                }
+            
+                    
+            }).catch(error =>{
+                console.log("Error: ",error);
+            })
+        
+         
+        })
+     
+       
+        function update_repo(){
+
+            $("#repo_update_button").attr("disabled", true);
+            document.getElementById("repo_update_button").classList.remove("btn-primary");
+            document.getElementById("repo_update_button").classList.add("btn-secondary");
+            document.getElementById("repo_update_success_output").innerText = "Updating Repo. Please Wait...";
+            var xml = new XMLHttpRequest();
+            
+            xml.open("POST", "{{url_for('web.ajax_update_repo')}}", true);
+            xml.setRequestHeader("Content-type", "application/json");
+            dataSend = JSON.stringify({});
+            xml.send(dataSend);
+            xml.onload = function () {
+                var dataReply = JSON.parse(this.responseText);
+                document.getElementById("repo_update_success_output").innerText = "";
+                if ("error" in dataReply) {
+                    document.getElementById("repo_update_fail_output").innerText = dataReply["error"];
+                } else {
+                    alert("Successfully Refreshed");
+                    location.reload();
+                }
+                $("#repo_update_button").removeAttr("disabled");
+                document.getElementById("repo_update_button").classList.add("btn-primary");
+                document.getElementById("repo_update_button").classList.remove("btn-secondary");
+            }
+            
+        }
+
+</script>
+
+{% endblock %}

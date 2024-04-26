@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <title>{% block page_title %}PCMD-Home{% endblock %}</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static'  , filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+    <styles >
+      <style>
+          #mainContent {
+            flex: 1; /* Allow main content to grow to fill the available space */
+         
+            position: relative; /* Enable relative positioning for absolute footer */
+          }
+          body {
+              margin: 0;
+              padding: 0;
+              display: grid;
+              grid-template-rows: auto 1fr auto; /* Header, Main content, Footer */
+              min-height: 100vh; /* Ensure the body takes up at least the full height of the viewport */
+          }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.6/css/jquery.dataTables.css">
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.min.js"></script>
+  </head>
+
+  <body  class="d-flex flex-column min-vh-100 bg-light"> 
+    <header>
+    <div id="navbar_main_section">
+      <nav class="navbar navbar-expand-md sticky-top px-2 navbar-dark bg-gradient-primary" style="background-color: #0a4275 !important;" role="navigation">
+        
+
+          {% if current_user.is_authenticated %}
+            {% if is_home is defined %}
+              {% block nav_dropdown %}
+              {% endblock %} 
+            {% else %}
+            <a href="{{ url_for('web.home') }}" class="navbar-brand active text-decoration-none text-white">
+              Home
+            </a>
+            {% endif %}
+          {% else %}
+            <p style="color:white;padding-top:15px">PCMD</p>
+          {% endif %}
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">            
+                   
+            {% if current_user.is_authenticated %}
+            <div class="nav-item ms-auto text-white">
+              <h5>PCMD - <small>Program Configuration Management tool</small></h5>
+            </div>
+            <div class="nav-item dropdown ms-auto">                        
+              <a class="nav-link dropdown-toggle text-white" href="#" id="navbar_profile_link" role="button"
+                  data-bs-toggle="dropdown" aria-expanded="false">
+                  <input type="image" width="20" name="profile" src="{{url_for('static', filename = 'profile.png')}}"
+                      alt="profile">                                                                
+              </a>
+              <ul class="dropdown-menu"   style="right: 0; left: auto;" aria-labelledby="navbar_profile_link">
+                  <!--
+                  <li><a class="dropdown-item" href="{{ url_for('web.profile') }}">Profile</a></li>
+                  -->
+                  <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                 <!-- <a class="dropdown-item" href="#">My Reserved HW</a></li> --><li>
+                  
+                  <li><a class="dropdown-item" href="{{ url_for('web.updateSheet') }}">Update Master Sheet</a></li>
+              </ul>
+            </div>
+            {% else %}
+            <div class="nav-item dropdown ms-auto">                        
+              <a class="nav-link text-white" href="{{ url_for('auth.login') }}" id="navbar_profile_link">
+                  Login                                                            
+              </a>
+            </div>
+            <div class="nav-item dropdown">   
+              <a class="nav-link text-white" href="{{ url_for('auth.signup') }}" id="navbar_profile_link">
+                Signup                                                           
+            </a>
+            </div>
+            {% endif %}
+        </div>
+    
+      </nav>    
+    </div>
+    </header>
+    <div class="container-fluid px-4">
+      <br/>
+      <div class="d-flex justify-content-center align-items-center">
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+          <div class="alert alert-{{category}} alert-dismissable">
+            <button type="button"class="btn-close" aria-label="Close" data-bs-dismiss="alert"></button>
+            {{ message }}
+          </div>
+        {% endfor %}
+        {% if form and form.errors %}
+        <div class="alert alert-danger alert-dismissable">
+          <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="alert"></button>
+          {% for error_field in form.errors %}
+              {% for rec_error in form.errors[error_field] %}
+              {{ rec_error }}
+              {% endfor %}
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div id="mainContent">
+        {% block content_container %}
+        {% endblock %}
+        <script>
+            document.addEventListener("DOMContentLoaded", function(event) {
+              // This function will be called when the DOM is fully loaded
+              var divElement = document.getElementById("mainContent"); // Replace "your-div-id" with the actual ID of your <div> element
+              var divWidth = divElement.offsetWidth;
+              var divHeight = divElement.offsetHeight;
+
+              // console.log("Div width: " + divWidth + "px");
+              // console.log("Div height: " + divHeight + "px");
+          
+              var footer = document.getElementById("footer");
+              if (divHeight <= 510) {
+                  footer.style.position = "fixed";
+                  footer.style.bottom = "0";
+                  footer.style.width = "100%";
+              }
+          });
+        </script>
+      </div>
+    </div>
+    {% include 'footer.html' %}
+    {% block scripts %}
+    {% endblock %}
+
+  </body>
+</html>

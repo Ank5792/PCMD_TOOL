@@ -1,0 +1,95 @@
+{% extends 'main.html' %}
+{% block page_title %} PCMD - Home {% endblock %}
+{% block content_container %}
+<!-- ... (existing code) ... -->
+
+    <!-- Display selected rows in a table below the button with time selection -->
+    <!--
+        <div style="max-height: 800px; max-width: 1700px; overflow-y: auto;">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    {% for column in columns %}
+                        <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for index, row in df.iterrows() %}
+                    <tr id="{{ index }}">
+                        {% for value in row %}
+                            <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    -->
+    <form action="{{ url_for('web.unreserve') }}" method="post" >
+        <div style="max-height: 800px; max-width: 1700px; overflow-y: auto;">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    {% for column in columns %}
+                        <th>{{ column }}</th>
+                    {% endfor %}
+                
+                 
+                </tr>
+            </thead>
+            <tbody>
+                {% for index, row in df.iterrows() %}
+    
+                    
+                    
+                    <tr id="{{ index }}">
+                        <td><input type="checkbox" name="selected_rows[]" value="{{ index }}"></td>
+                        {% for value in row %}
+                            <td>{{ value }}</td>
+                        {% endfor %}
+                        
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+        <div class="row mb-3 justify-content-center">
+            <button type="submit" class="btn btn-lg btn-success col-xs-12 col-md-4">UnReserve</button>
+        </div>
+    </form>
+    
+    <script>
+      
+        // JavaScript to handle row selection with checkboxes
+        
+        document.addEventListener("DOMContentLoaded", function () {
+            var selectedRows = [];
+    
+            function updateSelectedRows() {
+                document.getElementById("selected-rows").value = selectedRows.join(",");
+            }
+    
+            function toggleRowSelection(row) {
+                var index = selectedRows.indexOf(row);
+                if (index === -1) {
+                    selectedRows.push(row);
+                    document.getElementById(row).classList.add("selected-row");
+                } else {
+                    selectedRows.splice(index, 1);
+                    document.getElementById(row).classList.remove("selected-row");
+                }
+                updateSelectedRows();
+            }
+    
+            document.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
+                checkbox.addEventListener("change", function () {
+                    toggleRowSelection(checkbox.value);
+                });
+            });
+        });
+    </script>
+    
+{% endblock %}

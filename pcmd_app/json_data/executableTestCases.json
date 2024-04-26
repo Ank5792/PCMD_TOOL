@@ -1,0 +1,16 @@
+{
+    "Automated": [
+        {
+          "id":1234567890,
+          "platform":"platform1"
+        },
+        {
+            "id":1234567891,
+            "platform":"platform1"
+        },
+        {
+        "id":1234567892,
+        "platform":"platform1"
+        }
+    ]
+}

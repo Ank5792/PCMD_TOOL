@@ -1,0 +1,52 @@
+{
+    "GNR-AP": {
+        "label": "BCHSTRM.0.RPB.00",
+        "full_name": "GraniteRapids AP",
+        "rel_affected": "bios.birchstream_graniterapids-ap ifwi.birchstream_graniterapids-ap",
+        "sparse_checkout_json": "birchstream.json",
+        "parent_project": "Birchstream"
+    },
+    "FHWKFLS": {
+        "label": "FHWKFLS.0.RPB.00",
+        "full_name": "Fishhawk Falls",
+        "rel_affected": "bios.fishhawkfalls ifwi.",
+        "sparse_checkout_json": "fishhawkfalls.json",
+        "parent_project": "FishhawkFalls"
+    },
+    "EGS": {
+        "label": "EGLSTRM.0.RPB.00",
+        "full_name": "EagleStream",
+        "rel_affected": "bios. ifwi.",
+        "sparse_checkout_json": "eaglestream.json",
+        "parent_project": "EagleStream"
+    },
+    "KSYVLLE": {
+        "label": "KSYVLLE.1.RPB.00",
+        "full_name": "KaseyVille",
+        "rel_affected": "bios.kaseyville_graniterapids-d ifwi.kaseyville_graniterapids-d",
+        "sparse_checkout_json": "kaseyville.json",
+        "parent_project": "KaseyVille"
+    }
+   ,
+    "GNR SP": {
+        "label": "BCHSTRM.0.RPB.00",
+        "full_name": "GraniteRapids SP",
+        "rel_affected": "bios.birchstream-sp_graniterapids-sp ifwi.birchstream-sp_graniterapids-sp",
+        "sparse_checkout_json": "birchstream.json",
+        "parent_project": "Birchstream"
+    },
+    "SRF AP": {
+        "label": "BCHSTRM.0.RPB.00",
+        "full_name": "SierraForrest AP",
+        "rel_affected": "bios.birchstream_sierraforest-ap",
+        "sparse_checkout_json": "birchstream.json",
+        "parent_project": "Birchstream"
+    },
+    "bhs gnr milestone": {
+        "label": "BCHSTRM.0.RPB.21",
+        "full_name": "release/bhs_gnr_milestone",
+        "rel_affected": "bios.birchstream_graniterapids-ap ifwi.birchstream_graniterapids-ap",
+        "sparse_checkout_json": "birchstream_bhs_gnr_milestone.json",
+        "parent_project": "Birchstream Milestone"
+    }
+}

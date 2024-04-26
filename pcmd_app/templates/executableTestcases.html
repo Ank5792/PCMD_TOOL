@@ -1,0 +1,399 @@
+{% extends 'main.html' %}
+{% block page_title %} PCMD - Home {% endblock %}
+{% block content_container %}
+<style>
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+      width: fit-content;
+      margin: 0 auto;
+      margin-top: 50px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: 2px solid #3498db; /* Blue color */
+      background-color: transparent;
+      color: #3498db; /* Blue color */
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      justify-content: space-between;
+    }
+    .btn + .btn {
+      margin-left: 10px; /* Add space between buttons */
+    }
+    .btn:hover {
+      background-color: #3498db; /* Blue color on hover */
+      color: #fff; /* White text color on hover */
+    }
+    .email-container {
+  display: flex;
+  flex-wrap: wrap; /* Allow emails to wrap on multiple lines */
+  margin: 10px;
+}
+
+#email-input {
+  flex: 1; /* Take up remaining space in container */
+  padding: 5px;
+  border: 1px solid #ccc;
+  margin-right: 5px;
+}
+
+#add-btn {
+  padding: 5px 10px;
+  border: none;
+  background-color: #4CAF50; /* Green */
+  color: white;
+  cursor: pointer;
+}
+
+#emails {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 5px;
+}
+
+.email-tag {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  margin: 2px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #eee;
+  cursor: pointer; /* Make the whole tag clickable */
+}
+
+.email-tag span {
+  margin-right: 5px;
+}
+
+.email-tag .remove-btn {
+  color: red;
+  font-weight: bold;
+  cursor: pointer; /* Make the "x" clickable */
+}
+.form2 {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .input-group {
+      width: 100%;
+    }
+
+    .form-control {
+      width: 100%;
+    }
+
+    .email-container {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    #email-input {
+      flex: 1;
+      margin-right: 10px;
+      padding: 5px;
+    }
+
+    #add-btn {
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    #container2 {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    #container2 {
+      margin-top: 20px;
+    }
+
+    
+    .custom-table {
+   
+    width: 100%;
+    border-collapse: collapse;
+}
+
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-label {
+    margin-right: 5px;
+}
+
+.checkbox-input {
+    height: 20px;
+    width: 20px;
+    padding: 0;
+    margin: 0;
+    appearance: none;
+    border: 2px solid #3498db;
+    border-radius: 50%;
+}
+
+.checkbox-input:checked {
+    background-color: #3498db;
+}
+
+   
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        overflow: auto;
+        margin-bottom: 20px;
+        border-radius: 7px;
+    }
+    th, td {
+        border: 1.5px solid  #000000;
+        text-align: left;
+        padding: 8px;
+        
+
+    }
+    th {
+        background-color: #ffffff;
+    }
+</style>
+<div class="card">
+  <div class="card-header" style="text-align: center; font-family: 'Arial Black', sans-serif; font-size: 1em; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);">
+      Welcome to Test Execution Flow
+  </div>
+  <div class="card-body">
+      <div class="button-container">
+          <button class="btn" id="manualTestCases">Reserve Machine for Manual Test Cases</button>
+          <button class="btn" id="automatedTestCases">Execute Automated Test Cases</button>
+      </div>
+
+      <div id="container1" style="justify-content: center;">
+
+      </div> 
+      <form class="form2" id="form2" style="display: none;" action="{{ url_for('process_selected_checkboxes') }}" method="POST">
+        <div style="justify-content: center; text-align: center;margin-top: 10px;">
+            {% if option== "option2" %}
+                <label style="font-size: medium;"> 
+                    <input type="radio" name="radio_options" value="option2" checked>Config to Test_Case mapping
+                </label>
+                        
+                <label style="font-size: medium;">
+                    <input type="radio" name="radio_options" value="option1">Test_Case to Config mapping
+                </label>
+            {% else %}
+                <label style="font-size: medium;"> 
+                    <input type="radio" name="radio_options" value="option2">Config to Test_Case mapping
+                </label>
+                        
+                <label style="font-size: medium;">
+                    <input type="radio" name="radio_options" value="option1" checked>Test_Case to Config mapping
+                </label>
+            {% endif %}
+        </div>   
+        <div id="container2" style="justify-content: center;">
+               
+              <table id="myTable" class="table table-striped my-4" style="border: 1px solid black;">
+                  <thead>
+                      <tr>
+                          <th>
+                              <div class="checkbox-wrapper">
+                                  <label for="selectAllCheckbox" class="checkbox-label">Select All</label>
+                                  <input type="checkbox" id="selectAllCheckbox" style="height: 22px; width: 22px;align-items: center;" onclick="toggleSelectAll()" >
+                              </div>
+                          </th>
+                          {% for column in columns %}
+                          <th>{{ column }}</th>
+                          {% endfor %}
+                      </tr>
+                  </thead>
+                  <tbody>
+                      {% for index, row in df.iterrows() %}
+                      <tr id="{{ index }}" {% if index >= 5 %} style="display: none;" {% endif %}>
+                        <td><input type="checkbox" name="selected_rows[]" value="{% if option=='option1' %}{{ row['id'] }}{% else %}{{ row['Test Cases'] }}{% endif %}" style="height: 22px; width: 22px; align-items: center;" onclick="printCheckboxValue(this)"></td>
+                       
+                        
+                          {% for column, value in row.items() %}
+                          <td>{{ value }}</td>
+                          {% endfor %}
+                      </tr>
+                      {% endfor %}
+                      
+                  </tbody>
+              </table>
+              
+          </div>
+          <div id="paginationLinks" style="text-align: center; margin-top: 6px;"></div>
+          <div class="input-group input-group-sm mb-3 my-3">
+              <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Artifactory Link" style="height: 40px;">
+          </div>
+          <div class="input-group input-group-sm mb-3 my-3">
+              <input type="text" class="form-control custom-input" style="height: 40px;" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="email-input" placeholder="Enter email address">
+              <button class="btn btn-primary" id="add-btn">Add</button>
+          </div>
+          <div id="emails"></div>
+          <div class="my-5" style="display: flex; justify-content: center; align-items: center;">
+              <button class="btn btn-primary" id="executableTestCases" type="button">
+                  Execute 
+              </button>
+          </div>
+      </form>
+
+      
+  </div>
+
+</div>
+
+<script>
+    document.querySelectorAll('input[type=radio]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                document.getElementById('form2').submit(); // Submit form on change
+            });
+        });
+  document.getElementById("executableTestCases").addEventListener("click", function() {
+        document.getElementById("form2").submit();
+    });
+ function sendSelectedCheckboxes() {
+        var selectedCheckboxes = document.querySelectorAll('input[name="selected_rows[]"]:checked');
+        var selectedValues = [];
+        selectedCheckboxes.forEach(function(checkbox) {
+            selectedValues.push(checkbox.value);
+        });
+
+        // Send selectedValues to Flask route using AJAX
+        fetch('/process_selected_checkboxes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Add CSRF token if required
+            },
+            body: JSON.stringify(selectedValues)
+        })
+        .then(response => {
+            if (response.ok) {
+              
+                alert('Selected checkboxes sent successfully');
+                console.log('Selected checkboxes sent successfully');
+                // Handle response if required
+            } else {
+                console.error('Error sending selected checkboxes');
+                // Handle error if required
+            }
+        })
+        .catch(error => {
+            console.error('Error sending selected checkboxes:', error);
+            // Handle error if required
+        });
+    }
+  selected_checkboxes=[]
+   function printCheckboxValue(checkbox) {
+    var firstColumnValue = checkbox.parentNode.parentNode.cells[1].textContent;
+        clicked_data=document.querySelector('.clicked_data');
+        if (checkbox.checked) {
+                // If checkbox is checked, add the value to the list
+                console.log("firstColumnValue : ",firstColumnValue);
+                selected_checkboxes.push(firstColumnValue);
+                console.log("selected checkboxes = ",selected_checkboxes)
+            } else {
+                // If checkbox is unchecked, remove the value from the list
+                var index = selected_checkboxes.indexOf(firstColumnValue);
+                if (index !== -1) {
+                    selected_checkboxes.splice(index, 1);
+                }
+                console.log("selected checkboxes = ",selected_checkboxes)
+        }
+
+   }
+   $(document).ready(function() {
+        var rowsPerPage = 5;
+        var numRows = $('#myTable tbody tr').length;
+        var numPages = Math.ceil(numRows / rowsPerPage);
+        
+        // Generate pagination links
+        for (var i = 1; i <= numPages; i++) {
+            $('#paginationLinks').append('<a href="#" onclick="showPage(' + i + ')">' + i + '</a>&nbsp;');
+        }
+        showPage(1);
+    });
+
+    function showPage(pageNum) {
+        var rowsPerPage = 5;
+        var startIndex = (pageNum - 1) * rowsPerPage;
+        var endIndex = startIndex + rowsPerPage;
+        
+        // Show/hide rows based on page number
+        $('#myTable tbody tr').each(function(index) {
+            if (index >= startIndex && index < endIndex) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+        $('#paginationLinks a').css('background-color', ''); // Reset background color of all links
+        $('#paginationLinks a').eq(pageNum - 1).css('background-color', 'yellow'); // Highlight the clicked page number link
+        $('#paginationLinks a').css('font-weight', ''); // Highlight the clicked page number link
+        $('#paginationLinks a').eq(pageNum - 1).css('font-weight', 'bold'); 
+        $('#paginationLinks a').css('color', ''); 
+        $('#paginationLinks a').eq(pageNum - 1).css('color', 'black'); 
+    }
+
+   function toggleSelectAll() {
+        var checkboxes = document.querySelectorAll('input[name="selected_rows[]"]');
+        var selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        
+        for (var i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].checked = selectAllCheckbox.checked;
+        }
+    }
+    const emailInput = document.getElementById('email-input');
+    const addButton = document.getElementById('add-btn');
+    const emailsContainer = document.getElementById('emails');
+
+    addButton.addEventListener('click', addEmail);
+
+    function addEmail() {
+    const emailValue = emailInput.value.trim(); // Trim whitespace
+    if (emailValue) {
+        const emailTag = document.createElement('div');
+        emailTag.classList.add('email-tag');
+        emailTag.innerHTML = `<span>${emailValue}</span><button class="remove-btn">x</button>`;
+
+        emailTag.querySelector('.remove-btn').addEventListener('click', function() {
+        emailsContainer.removeChild(emailTag);
+        });
+
+        emailsContainer.appendChild(emailTag);
+        emailInput.value = ''; // Clear input field after adding
+    }
+    }
+
+    const form2 = document.getElementById("form2");
+     document.querySelector('#automatedTestCases').addEventListener('click',function(){
+        console.log("Finding automated test cases")
+        var footer = document.getElementById("footer");
+             
+        footer.style.position = "relative";
+        footer.style.bottom = "0";
+        footer.style.width = "100%";
+             
+        form2.style.display="block";
+    });
+    document.querySelector('#manualTestCases').addEventListener('click',function(){
+        console.log("Finding Manual test cases")
+        var footer = document.getElementById("footer");
+             
+        footer.style.position = "fixed";
+        footer.style.bottom = "0";
+        footer.style.width = "100%";
+        form2.style.display="none";
+    });
+    
+</script>
+{% endblock %}

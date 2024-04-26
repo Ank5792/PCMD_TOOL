@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Selector</title>
+    <style>
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="input-group">
+            <label for="selector">Select Option:</label>
+            <select id="selector">
+                <option value="article_id">Article ID</option>
+                <option value="query_id">Query ID</option>
+            </select>
+        </div>
+        <div id="articleIdInput" class="input-group">
+            <label for="articleId">Enter Article ID:</label>
+            <input type="text" id="articleId">
+        </div>
+        <div id="queryOptions" class="hidden">
+            <div class="input-group">
+                <label for="queryType">Select Query Type:</label>
+                <select id="queryType">
+                    <option value="orange">Orange Query</option>
+                    <option value="blue">Blue Query</option>
+                </select>
+            </div>
+            <div id="blueQueryOptions" class="hidden">
+                <label for="blueQueryComponents">Select Component:</label>
+                <select id="blueQueryComponents">
+                    <option value="component1">Component 1</option>
+                    <option value="component2">Component 2</option>
+                    <option value="component3">Component 3</option>
+                    <!-- Add more options as needed -->
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="mappingOption">Select Mapping Option:</label>
+                <select id="mappingOption">
+                    <option value="platformToTCD">Platform to TCD Mapping</option>
+                    <option value="tcdToPlatform">TCD to Platform Mapping</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selector = document.getElementById('selector');
+            const articleIdInput = document.getElementById('articleIdInput');
+            const queryOptions = document.getElementById('queryOptions');
+            const blueQueryOptions = document.getElementById('blueQueryOptions');
+
+            selector.addEventListener('change', function() {
+                if (selector.value === 'article_id') {
+                    articleIdInput.classList.remove('hidden');
+                    queryOptions.classList.add('hidden');
+                } else if (selector.value === 'query_id') {
+                    articleIdInput.classList.add('hidden');
+                    queryOptions.classList.remove('hidden');
+                }
+            });
+
+            const queryType = document.getElementById('queryType');
+            queryType.addEventListener('change', function() {
+                if (queryType.value === 'blue') {
+                    blueQueryOptions.classList.remove('hidden');
+                } else {
+                    blueQueryOptions.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

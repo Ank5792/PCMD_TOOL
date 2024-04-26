@@ -1,0 +1,175 @@
+{% extends 'main.html' %}
+{% block page_title %} PCMD - Home {% endblock %}
+{% block content_container %}
+<style>
+    .card {
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+    overflow: hidden;
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card h2 {
+    background-color: #06922b;
+    color: #fff;
+    font-size: 20px;
+    margin: 0;
+    padding: 10px;
+    text-align: center;
+}
+
+.content {
+    padding: 20px;
+}
+
+.content p {
+    margin: 10px 0;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.key {
+    flex: 1;
+    font-weight: bold;
+    color: #2646e6;
+}
+.value {
+    flex: 2;
+}
+
+
+/* CSS for table styling */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    background-color: #e1f5fe; /* sky blue color */
+}
+
+.table th,
+.table td {
+    border: 1px solid #050505;
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #bdbdbd; /* light grey border */
+}
+
+.table th {
+    background-color: #69aae0; /* blue color for header */
+    color: rgb(0, 0, 0); /* white text color for header */
+}
+
+.table tbody tr:nth-child(odd) {
+    border: 1px solid #050505;
+    background-color: #ffffff; /* white background for odd rows */
+}
+
+.table tbody tr:nth-child(even) {
+    border: 1px solid #050505;
+    background-color: #f5f5f5; /* light grey background for even rows */
+}
+
+</style>
+<div style="text-align: center;"><h4> Automation Status</h4></div>
+
+{% for outer_key, outer_value in jsonData.items() %}
+   
+    <div class="card">
+        <div class="header">
+            <h2>{{ outer_key }}</h2>
+        </div>
+        
+        <div class="content">
+
+            
+            {% for key_inner, value_inner in outer_value.items() %}
+                <div class="header" style="text-align: center; ">
+                    <h3><u>{{ key_inner }}</u></h3>
+                </div>
+                
+
+                
+                    {% for key_inner1, value_inner1 in value_inner.items() %}
+                        
+                        {% if key_inner1=="Tcd Config details" %}
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Plaform Name</th>
+                                            <th>Test Case / Article Ids</th>
+                                            <th>Trigger status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for key_inner2, value_inner2 in value_inner1.items() %}
+                                            <tr style="border: 1px solid #050505">
+                                                <td>{{ key_inner2 }} 
+                                                    {% if  value_inner2["Trigger status"]=="Not IDLE" %}
+                                                        <a href="">Make Platform IDLE</a>
+                                                    {% endif %}
+
+                                                </td>
+                                                <td>{{ value_inner2["Test Case / Article Ids"] }}</td>
+                                                <td>{{ value_inner2["Trigger status"] }}
+                                                    <a href="https://dcg-caf.intel.com/DCG/BHS_GNR_AP_Postsilicon_Github/plan_list/8911/" target="_blank"> Caf Link</a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                
+                            </div>
+                           
+                        {% else %}
+                            <div class="key">{{ key_inner1 }}:</div>
+                            <div class="value" style="text-align: right;"><strong>{{ value_inner1["Time & Date"] }}</strong></div>
+
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Artifactory Link</th>
+                                            <th>Email List</th>
+                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                       
+                                            <tr>
+                                                <td>{{ value_inner1["Artifactory Link"] }}</td>
+                                                <td>{{ value_inner1["Email List"] }}</td>
+                                               
+                                            </tr>
+                                     
+                                    </tbody>
+                                </table>
+                            </div>
+                           
+                        {% endif %}
+                        
+                    {% endfor %}
+               
+                
+            {% endfor %}
+        </div>
+    </div>
+{% endfor %}
+
+
+<script>
+    
+</script>
+
+ 
+{% endblock %}

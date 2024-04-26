@@ -1,0 +1,67 @@
+{% extends 'home.html' %}
+{% block page_title %} Add Project {% endblock %}
+{% block content_container %}
+<div class="row">
+  <div class="col-xs-12 col-lg-8  mx-auto">
+    <div class="card card-body shadow">
+        <h5 class="card-title">
+            Please provide the details of your Tool here.
+        </h5>
+      <form method="POST" action="{{ url_for('web.new_project') }}" role="form">
+        {{ form.csrf_token }}
+        <div class="mb-3">
+            {{ form.tool_name(class="form-control", placeholder="Enter your tool name.") }}
+          </div>
+        <div class="mb-3">
+          {{ form.owner(class="form-control",placeholder = "Enter your Email") }}
+        </div>
+        <div class="mb-3">
+          {{ form.short_description(class="form-control", placeholder="Enter a short description. (5 to 6 lines)") }}
+        </div>
+        <div class="mb-3">
+            {{ form.description(class="form-control", placeholder="Enter complete description of the tool here.") }}
+        </div>
+        <div class="mb-3">
+        {{ form.current_status(class="form-select",onchange="show_link()",id="cur_status" ) }}
+        </div>
+        <div class="mb-3" id="tool_link_input" hidden>
+        {{ form.working_links(class="form-control", placeholder="Enter working links (seperated by ;) if available") }}
+        </div>
+        <div class="mb-3">
+            {{ form.wiki_link(class="form-control", placeholder="Enter Wiki Link for the tool if available") }}
+            </div>
+        <div class="mb-3">
+        {{ form.jira_link(class="form-control", placeholder="Enter jira link where the project's status is being tracked.") }}
+        </div>
+        <div class="mb-3">
+        {{ form.current_devs(class="form-control", placeholder="Enter Email of current Devs. (seperated by ;)") }}
+        </div>
+        <div class="mb-3">
+            {{ form.ags_link(class="form-control", placeholder="Enter AGS link where user can request for access.") }}
+            </div>
+        <div class="row mb-3 justify-content-center">
+          <button type="submit" class="btn btn-lg btn-success col-xs-12 col-md-4">Submit</button>
+        </div>        
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+    function show_link(){
+        cur_val =  document.getElementById("cur_status").value;
+        if(cur_val==="web_prod" || cur_val=="off_prod"){
+            document.getElementById("tool_link_input").hidden=false;
+        }
+        else{
+          document.getElementById("working_links" ).value = "";
+            document.getElementById("tool_link_input").hidden=true;
+        }
+    }
+    
+</script>
+  
+
+{% endblock %}
